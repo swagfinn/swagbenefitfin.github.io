@@ -1,2097 +1,2375 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>大神贊助預約系統</title>
-  <style>
-    :root {
-      --bg1: #18102f;
-      --bg2: #0a0d1f;
-      --bg3: #04050b;
-      --panel: #140b35;
-      --line: rgba(103, 76, 172, 0.75);
-      --border: rgba(68, 255, 138, 0.26);
-      --text: #ffffff;
-      --neon: #4ade80;
-      --coral: #ff6f6f;
-      --purple-btn1: #5b4ca0;
-      --purple-btn2: #31255f;
-      --purple-btn-shadow: #17102f;
-      --radius: 28px;
-      --shadow: 0 20px 50px rgba(0,0,0,.58);
-      --day-bg: #171129;
-      --day-bg-dark: #07060d;
-      --day-min-height: 200px;
-      --calendar-collapsed: 560px;
-      --calendar-expanded: 1400px;
-      --badge-text: rgba(0, 0, 0, .95);
-      --badge-bg1: #5ef089;
-      --badge-bg2: #39d969;
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      color: var(--text);
-      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
-      background:
-        radial-gradient(circle at 18% 10%, rgba(74,222,128,.08), transparent 22%),
-        radial-gradient(circle at 82% 12%, rgba(90,120,255,.12), transparent 24%),
-        linear-gradient(180deg, #21123c 0%, #0d1024 44%, #030409 100%);
-    }
-
-    body { padding: 24px; }
-
-    .wrap {
-      max-width: 1240px;
-      margin: 0 auto;
-    }
-
-    .ui-card {
-      position: relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)), var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: visible;
-    }
-
-    .ui-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-    }
-
-    .hero {
-      padding: 22px 24px;
-      margin-bottom: 18px;
-      overflow: hidden;
-    }
-
-    .hero h1 {
-      margin: 0 0 8px;
-      color: var(--neon);
-      font-size: 31px;
-      font-weight: 900;
-      text-shadow: 0 0 14px rgba(74,222,128,.22);
-    }
-
-    .hero p {
-      margin: 0;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: .04em;
-    }
-
-    .calendar-card {
-      margin-bottom: 20px;
-      z-index: 5;
-      overflow: visible;
-    }
-
-    .calendar-topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding: 18px 22px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      background: linear-gradient(180deg, rgba(74,222,128,.04), rgba(255,255,255,.01));
-      border-top-left-radius: var(--radius);
-      border-top-right-radius: var(--radius);
-    }
-
-    .calendar-title-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .calendar-title {
-      margin: 0;
-      font-size: 23px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .mode-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 8px 14px;
-      border-radius: 999px;
-      color: #08150b;
-      font-size: 13px;
-      font-weight: 900;
-      background: linear-gradient(180deg, #dcffeb, #89ffae);
-      border: 2px solid rgba(255,255,255,.45);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 8px 16px rgba(0,0,0,.18);
-    }
-
-    .mode-badge .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--neon);
-      box-shadow: 0 0 10px rgba(74,222,128,.5);
-    }
-
-    .month-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn {
-      appearance: none;
-      border: none;
-      cursor: pointer;
-      color: #fff;
-      font-weight: 900;
-      letter-spacing: .02em;
-      transition: transform .16s ease, filter .16s ease, opacity .16s ease;
-    }
-
-    .btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
-    }
-
-    .btn:disabled {
-      opacity: .42;
-      cursor: not-allowed;
-    }
-
-    .icon-btn {
-      width: 58px;
-      height: 58px;
-      border-radius: 18px;
-      font-size: 28px;
-      background: linear-gradient(180deg, var(--purple-btn1), var(--purple-btn2));
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.12),
-        inset 0 -4px 0 rgba(0,0,0,.28),
-        0 4px 0 var(--purple-btn-shadow);
-      border: 1px solid rgba(255,255,255,.12);
-    }
-
-    .calendar-shell {
-      max-height: var(--calendar-collapsed);
-      overflow: hidden;
-      transition: max-height .28s ease;
-    }
-
-    .calendar-card:hover .calendar-shell,
-    .calendar-card:focus-within .calendar-shell {
-      max-height: var(--calendar-expanded);
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 0;
-      border-top: 1px solid var(--line);
-      border-left: 1px solid var(--line);
-      position: relative;
-      z-index: 2;
-    }
-
-    .weekday {
-      text-align: center;
-      padding: 12px 6px;
-      font-size: 22.5pt;
-      font-weight: 900;
-      color: #f4fff7;
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      background: rgba(18, 14, 36, .56);
-      white-space: nowrap;
-    }
-
-    .day {
-      min-height: var(--day-min-height);
-      padding: 14px 16px;
-      background: var(--day-bg);
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow: visible;
-      isolation: isolate;
-    }
-
-    .day.past { background: var(--day-bg-dark); }
-    .day.outside-month {
-      background: #09080e;
-      opacity: .42;
-      pointer-events: none;
-    }
-
-    .day.selectable { cursor: pointer; }
-
-    .day.selected {
-      outline: 3px solid rgba(74,222,128,.75);
-      outline-offset: -3px;
-      background: rgba(63, 77, 112, .9);
-    }
-
-    .day:hover,
-    .day:focus-within {
-      z-index: 80;
-    }
-
-    .day-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .day-num {
-      font-size: 38px;
-      font-weight: 900;
-      line-height: 1;
-      font-style: italic;
-      color: rgba(255,255,255,.55);
-    }
-
-    .day.selected .day-num { color: var(--neon); }
-
-    .day-top-right {
-      min-width: 28px;
-      height: 15px;
-      padding: 0 4px;
-      border-radius: 5px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 900;
-      color: var(--badge-text);
-      background: linear-gradient(180deg, var(--badge-bg1), var(--badge-bg2));
-      box-shadow: 0 3px 10px rgba(0,0,0,.18);
-    }
-
-    .day-top-right.locked {
-      min-width: auto;
-      height: auto;
-      padding: 0;
-      background: transparent;
-      box-shadow: none;
-      color: rgba(255,255,255,.54);
-      font-size: 13px;
-    }
-
-    .day-bookings {
-      margin-top: auto;
-      min-height: 112px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      gap: 7px;
-      position: relative;
-    }
-
-    .booking-text {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 24px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .signal-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      flex: 0 0 10px;
-      box-shadow: 0 0 8px currentColor;
-    }
-
-    .signal-normal {
-      color: var(--neon);
-      background: var(--neon);
-    }
-
-    .signal-priority {
-      color: var(--coral);
-      background: var(--coral);
-    }
-
-    .empty-note {
-      margin-top: auto;
-      min-height: 68px;
-      display: flex;
-      align-items: flex-end;
-      padding-top: calc(1.5em + 18px);
-      color: rgba(255,255,255,.45);
-      font-size: 14px;
-      font-weight: 800;
-    }
-
-    .full-ribbon {
-      position: absolute;
-      left: 50%;
-      top: calc(50% + 24px);
-      transform: translate(-50%, -50%) rotate(345deg);
-      padding: 10px 22px;
-      border-radius: 14px;
-      background: rgba(28,28,28,.96);
-      color: #fff;
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      border: 3px solid rgba(255,255,255,.76);
-      box-shadow: 0 0 18px rgba(255,255,255,.22), 0 8px 18px rgba(0,0,0,.32);
-      pointer-events: none;
-      z-index: 6;
-    }
-
-    .day-pop {
-      position: absolute;
-      left: 50%;
-      top: 58%;
-      transform: translate(-50%, -50%) scale(.96);
-      width: 280px;
-      max-width: min(92vw, 280px);
-      padding: 16px 18px;
-      border-radius: 28px;
-      background: var(--day-bg);
-      border: 4px solid rgba(255,255,255,.6);
-      box-shadow: 0 20px 46px rgba(0,0,0,.5);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .16s ease, transform .16s ease;
-      z-index: 9999;
-      overflow-wrap: anywhere;
-    }
-
-    .day.col-0 .day-pop,
-    .day.col-1 .day-pop {
-      left: 10px;
-      right: auto;
-      transform: translate(0, -50%) scale(.96);
-    }
-
-    .day.col-5 .day-pop,
-    .day.col-6 .day-pop {
-      left: auto;
-      right: 10px;
-      transform: translate(0, -50%) scale(.96);
-    }
-
-    .day.has-info:hover .day-pop,
-    .day.has-info:focus-within .day-pop {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .day.col-0.has-info:hover .day-pop,
-    .day.col-0.has-info:focus-within .day-pop,
-    .day.col-1.has-info:hover .day-pop,
-    .day.col-1.has-info:focus-within .day-pop,
-    .day.col-5.has-info:hover .day-pop,
-    .day.col-5.has-info:focus-within .day-pop,
-    .day.col-6.has-info:hover .day-pop,
-    .day.col-6.has-info:focus-within .day-pop {
-      transform: translate(0, -50%) scale(1);
-    }
-
-    .day-pop-title {
-      margin-bottom: 10px;
-      font-size: 17px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .day-pop-divider {
-      height: 1px;
-      margin: 10px 0 12px;
-      background: rgba(255,255,255,.18);
-    }
-
-    .day-pop-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 800;
-      line-height: 1.6;
-      overflow-wrap: anywhere;
-    }
-
-    .day-pop-full {
-      font-size: 15px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 12px 14px 14px;
-      font-size: 13px;
-      color: #fff;
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 11px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      box-shadow: 0 0 8px currentColor;
-    }
-
-    .legend-normal { color: var(--neon); background: var(--neon); }
-    .legend-priority { color: var(--coral); background: var(--coral); }
-    .legend-locked { color: #94a3b8; background: #94a3b8; }
-
-    .bottom-layout {
-      display: grid;
-      grid-template-columns: 1.06fr .94fr;
-      gap: 20px;
-    }
-
-    .section {
-      padding: 22px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .section-title {
-      margin: 0 0 14px;
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .message {
-      display: none;
-      margin-top: 10px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      font-size: 14px;
-      font-weight: 900;
-      border: 2px solid rgba(255,255,255,.14);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.16);
-    }
-
-    .message.show { display: block; }
-    .message.error {
-      color: #fff2f5;
-      background: linear-gradient(180deg, rgba(255,117,152,.92), rgba(220,60,98,.9));
-    }
-    .message.success {
-      color: #09210f;
-      background: linear-gradient(180deg, rgba(128,246,150,.96), rgba(54,202,88,.96));
-    }
-
-    form { display: grid; gap: 14px; }
-
-    .desktop-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    .field {
-      display: grid;
-      gap: 7px;
-      min-width: 0;
-      width: 100%;
-    }
-
-    .field label {
-      font-size: 16px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: rgba(255,255,255,.88);
-    }
-
-    .input-wrap {
-      position: relative;
-      width: 100%;
-      height: 52px;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    input[list] {
-      width: 100%;
-      height: 52px;
-      padding: 13px 14px;
-      border: 2px solid rgba(255,255,255,.18);
-      border-radius: 18px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
-        rgba(15, 18, 39, .82);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      outline: none;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.1), inset 0 -3px 0 rgba(0,0,0,.14);
-      transition: border-color .16s ease, transform .16s ease;
-    }
-
-    input:focus {
-      border-color: rgba(74,222,128,.58);
-      transform: translateY(-1px);
-    }
-
-    #username::placeholder,
-    #cpName::placeholder {
-      color: rgba(255,255,255,.48);
-    }
-
-    .lv-inline {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255,255,255,.88);
-      font-size: 13px;
-      font-weight: 900;
-      pointer-events: none;
-    }
-
-    .level-single input {
-      padding-right: 48px;
-    }
-
-    .date-row {
-      display: grid;
-      grid-template-columns: 1fr 56px;
-      gap: 10px;
-      align-items: center;
-      min-height: 52px;
-    }
-
-    .calendar-trigger {
-      width: 56px;
-      height: 52px;
-      border: none;
-      border-radius: 18px;
-      cursor: pointer;
-      color: #061208;
-      font-size: 24px;
-      font-weight: 900;
-      background: linear-gradient(180deg, #7eff9b, #2ddd57);
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.42), inset 0 -3px 0 rgba(0,0,0,.18), 0 8px 16px rgba(0,0,0,.28);
-    }
-
-    .form-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 3px;
-    }
-
-    .btn-green {
-      min-height: 50px;
-      padding: 0 22px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #74ff94, #1fd14f);
-      color: #09210f;
-      font-size: 15px;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.3), inset 0 -4px 0 rgba(0,0,0,.2), 0 8px 16px rgba(0,0,0,.24);
-    }
-
-    .btn-dark {
-      min-height: 50px;
-      padding: 0 22px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #6d7ab5, #37446f);
-      color: #fff;
-      font-size: 15px;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.12), inset 0 -4px 0 rgba(0,0,0,.3), 0 8px 16px rgba(0,0,0,.24);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
-
-    .submit-cooldown {
-      opacity: .38 !important;
-      cursor: not-allowed !important;
-      filter: grayscale(.2);
-    }
-
-    .foot-note {
-      margin-top: 8px;
-      color: rgba(255,255,255,.88);
-      font-size: 12px;
-    }
-
-    .rules {
-      display: grid;
-      gap: 12px;
-    }
-
-    .rule-block {
-      padding: 15px 16px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)), rgba(10,12,28,.72);
-      border: 1px solid rgba(255,255,255,.1);
-    }
-
-    .rule-block .plain-lines {
-      color: rgba(255,255,255,.88);
-      font-size: 14px;
-      line-height: 1.75;
-      white-space: pre-line;
-    }
-
-    .mini-calendar-pop {
-      position: absolute;
-      z-index: 30;
-      width: 320px;
-      max-width: calc(100vw - 32px);
-      padding: 14px;
-      border-radius: 22px;
-      border: 1px solid rgba(74,222,128,.26);
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)), rgba(6,8,20,.97);
-      box-shadow: 0 18px 38px rgba(0,0,0,.46);
-      display: none;
-    }
-
-    .mini-calendar-pop.show { display: block; }
-
-    .mini-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .mini-head-title {
-      font-size: 15px;
-      font-weight: 900;
-      color: #fff;
-    }
-
-    .mini-nav {
-      display: flex;
-      gap: 8px;
-    }
-
-    .mini-nav button {
-      width: 34px;
-      height: 34px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background: linear-gradient(180deg, #7eff9b, #2ddd57);
-      color: #09140b;
-      font-size: 18px;
-      font-weight: 900;
-    }
-
-    .mini-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-
-    .mini-weekday {
-      text-align: center;
-      padding: 4px 0;
-      color: #f0fff4;
-      font-size: 11px;
-      font-weight: 900;
-    }
-
-    .mini-day {
-      height: 36px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)), rgba(22,28,55,.96);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .mini-day.disabled {
-      opacity: .32;
-      cursor: not-allowed;
-    }
-
-    .mini-day.selected {
-      background: linear-gradient(180deg, #7eff9b, #2ddd57);
-      color: #071809;
-    }
-
-    .mini-day.today {
-      outline: 2px solid rgba(74,222,128,.62);
-      outline-offset: 1px;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(0,0,0,.68);
-    }
-
-    .overlay.show { display: flex; }
-
-    .popup {
-      width: 100%;
-      max-width: 525px;
-      border-radius: 28px;
-      background: #140b35;
-      border: 3px solid rgba(74,222,128,.42);
-      box-shadow: 0 0 36px rgba(74,222,128,.12), 0 24px 60px rgba(0,0,0,.54);
-      overflow: hidden;
-    }
-
-    .popup-head {
-      padding: 26px 20px 10px;
-      text-align: center;
-    }
-
-    .popup-icon-wrap {
-      width: 106px;
-      height: 106px;
-      margin: 0 auto 18px;
-      border-radius: 28px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(180deg, #5ef088, #39d76b);
-      box-shadow: inset 0 -10px 0 rgba(0,0,0,.14);
-    }
-
-    .popup-icon {
-      width: 50px;
-      height: 50px;
-    }
-
-    .popup-title {
-      margin: 0 0 8px;
-      color: #fff;
-      font-size: 28px;
-      font-weight: 900;
-    }
-
-    .popup-subtitle {
-      margin-bottom: 18px;
-      color: var(--neon);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .4em;
-      text-transform: uppercase;
-    }
-
-    .popup-body {
-      padding: 0 28px 20px;
-    }
-
-    .popup-scroll-wrap {
-      padding: 18px 8px 18px 18px;
-      border-radius: 28px;
-      background: rgba(0,0,0,.44);
-    }
-
-    .popup-scroll {
-      max-height: 292px;
-      overflow-y: auto;
-      padding-right: 16px;
-      color: rgba(255,255,255,.95);
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
-    .popup-scroll::-webkit-scrollbar { width: 8px; }
-    .popup-scroll::-webkit-scrollbar-thumb {
-      background: var(--neon);
-      border-radius: 999px;
-    }
-
-    .rule-row {
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 14px;
-      align-items: start;
-      margin-bottom: 18px;
-    }
-
-    .rule-num {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      background: rgba(74,222,128,.12);
-      color: var(--neon);
-      font-size: 18px;
-      font-weight: 900;
-      margin-top: 2px;
-    }
-
-    .rule-text-pop strong { color: var(--neon); }
-
-    .popup-bottom-read {
-      margin-top: 12px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .popup-inline-message {
-      display: none;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 13px;
-      font-weight: 900;
-      line-height: 1.5;
-      border: 1px solid rgba(255,255,255,.14);
-    }
-
-    .popup-inline-message.show {
-      display: block;
-    }
-
-    .popup-inline-message.error {
-      color: #fff2f5;
-      background: linear-gradient(180deg, rgba(255,117,152,.92), rgba(220,60,98,.9));
-    }
-
-    .popup-actions {
-      display: flex;
-      gap: 14px;
-      justify-content: space-between;
-      padding: 0 28px 28px;
-    }
-
-    .popup-actions .btn {
-      flex: 1;
-      min-height: 56px;
-      border-radius: 20px;
-    }
-
-    .popup-submit-ready {
-      opacity: 1 !important;
-      cursor: pointer !important;
-      filter: none !important;
-    }
-
-    @media (max-width: 980px) {
-      .bottom-layout { grid-template-columns: 1fr; }
-      .calendar-topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .month-controls { justify-content: flex-end; }
-    }
-
-    @media (max-width: 760px) {
-      body { padding: 12px; }
-      .hero h1 { font-size: 26px; }
-
-      .calendar-card { overflow: hidden; }
-
-      .calendar-shell {
-        max-height: 520px;
-        overflow: auto;
-      }
-
-      .calendar-card:hover .calendar-shell,
-      .calendar-card:focus-within .calendar-shell {
-        max-height: 1000px;
-      }
-
-      .calendar-grid {
-        transform: scale(.82);
-        transform-origin: top center;
-        width: 121.95%;
-        margin-left: -10.975%;
-        margin-bottom: -110px;
-      }
-
-      .day {
-        min-height: 148px;
-        padding: 9px 9px;
-      }
-
-      .weekday {
-        padding: 7px 3px;
-        font-size: 13px;
-      }
-
-      .day-num { font-size: 22px; }
-      .booking-text, .empty-note { font-size: 11px; }
-      .day-top-right { font-size: 10px; min-width: 26px; height: 14px; }
-
-      .full-ribbon {
-        font-size: 13.6px;
-        padding: 8.5px 18.7px;
-        border-width: 2.55px;
-        border-radius: 11.9px;
-      }
-
-      .day-pop {
-        position: fixed;
-        left: 50% !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) scale(.92) !important;
-        width: min(88vw, 300px);
-        max-width: min(88vw, 300px);
-        z-index: 10000;
-        border-radius: 22px;
-        padding: 14px;
-      }
-
-      .day.has-info:hover .day-pop,
-      .day.has-info:focus-within .day-pop,
-      .day.has-info:active .day-pop {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(-50%, -50%) scale(1) !important;
-      }
-
-      .desktop-row { grid-template-columns: 1fr; }
-
-      .popup-title { font-size: 22px; }
-      .popup-subtitle {
-        letter-spacing: .22em;
-        font-size: 11px;
-      }
-
-      .mini-calendar-pop {
-        width: min(320px, calc(100vw - 24px));
-        right: 0;
-        left: auto;
-      }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#140b35" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>大神贊助預約系統</title>
+  <style>
+    :root {
+      --bg1: #18102f;
+      --bg2: #0a0d1f;
+      --bg3: #04050b;
+      --panel: #140b35;
+      --line: rgba(103, 76, 172, 0.75);
+      --border: rgba(68, 255, 138, 0.26);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.7);
+      --neon: #4ade80;
+      --coral: #ff6f6f;
+      --purple-btn1: #5b4ca0;
+      --purple-btn2: #31255f;
+      --purple-btn-shadow: #17102f;
+      --radius: 28px;
+      --shadow: 0 20px 50px rgba(0,0,0,.58);
+      --day-bg: #171129;
+      --day-bg-dark: #07060d;
+      --day-min-height: 200px;
+      --calendar-collapsed: 560px;
+      --calendar-expanded: 1400px;
+      --badge-text: rgba(0, 0, 0, .95);
+      --badge-bg1: #5ef089;
+      --badge-bg2: #39d969;
+      --focus-ring: 0 0 0 3px rgba(74,222,128,.28);
+      --danger: #ff7598;
+      --success: #36ca58;
+      --transition-fast: .16s ease;
+      --transition-mid: .24s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      color: var(--text);
+      font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(74,222,128,.08), transparent 22%),
+        radial-gradient(circle at 82% 12%, rgba(90,120,255,.12), transparent 24%),
+        linear-gradient(180deg, #21123c 0%, #0d1024 44%, #030409 100%);
+    }
+
+    body {
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    img, svg {
+      max-width: 100%;
+      display: block;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button, a, input {
+      touch-action: manipulation;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .ui-card {
+      position: relative;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: visible;
+      backdrop-filter: blur(8px);
+    }
+
+    .ui-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .hero {
+      padding: 22px 24px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      color: var(--neon);
+      font-size: clamp(24px, 3vw, 31px);
+      font-weight: 900;
+      text-shadow: 0 0 14px rgba(74,222,128,.22);
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 0;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: .04em;
+    }
+
+    .calendar-card {
+      margin-bottom: 20px;
+      z-index: 5;
+      overflow: visible;
+    }
+
+    .calendar-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(74,222,128,.04), rgba(255,255,255,.01));
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+    }
+
+    .calendar-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .calendar-title {
+      margin: 0;
+      font-size: clamp(20px, 2.6vw, 23px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .mode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 14px;
+      border-radius: 999px;
+      color: #08150b;
+      font-size: 13px;
+      font-weight: 900;
+      background: linear-gradient(180deg, #dcffeb, #89ffae);
+      border: 2px solid rgba(255,255,255,.45);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 8px 16px rgba(0,0,0,.18);
+    }
+
+    .mode-badge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--neon);
+      box-shadow: 0 0 10px rgba(74,222,128,.5);
+      flex: 0 0 10px;
+    }
+
+    .month-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 900;
+      letter-spacing: .02em;
+      transition: transform var(--transition-fast), filter var(--transition-fast), opacity var(--transition-fast), box-shadow var(--transition-fast);
+      user-select: none;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    .btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn:focus-visible,
+    .icon-btn:focus-visible,
+    .calendar-trigger:focus-visible,
+    .mini-nav button:focus-visible,
+    .mini-day:focus-visible,
+    input:focus-visible,
+    .day.selectable:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    .btn:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+
+    .icon-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      font-size: 28px;
+      background: linear-gradient(180deg, var(--purple-btn1), var(--purple-btn2));
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.12),
+        inset 0 -4px 0 rgba(0,0,0,.28),
+        0 4px 0 var(--purple-btn-shadow);
+      border: 1px solid rgba(255,255,255,.12);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .calendar-shell {
+      max-height: var(--calendar-collapsed);
+      overflow: hidden;
+      transition: max-height .28s ease;
+    }
+
+    .calendar-card:hover .calendar-shell,
+    .calendar-card:focus-within .calendar-shell {
+      max-height: var(--calendar-expanded);
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      position: relative;
+      z-index: 2;
+      width: 100%;
+    }
+
+    .weekday {
+      text-align: center;
+      padding: 12px 6px;
+      font-size: clamp(14px, 1.7vw, 20px);
+      font-weight: 900;
+      color: #f4fff7;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(18, 14, 36, .56);
+      white-space: nowrap;
+    }
+
+    .day {
+      min-height: var(--day-min-height);
+      padding: 14px 16px;
+      background: var(--day-bg);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: visible;
+      isolation: isolate;
+      transition: background var(--transition-fast), outline-color var(--transition-fast);
+    }
+
+    .day.past { background: var(--day-bg-dark); }
+
+    .day.outside-month {
+      background: #09080e;
+      opacity: .42;
+      pointer-events: none;
+    }
+
+    .day.selectable {
+      cursor: pointer;
+    }
+
+    .day.selected {
+      outline: 3px solid rgba(74,222,128,.75);
+      outline-offset: -3px;
+      background: rgba(63, 77, 112, .9);
+    }
+
+    .day:hover,
+    .day:focus-within {
+      z-index: 80;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .day-num {
+      font-size: clamp(24px, 2.5vw, 38px);
+      font-weight: 900;
+      line-height: 1;
+      font-style: italic;
+      color: rgba(255,255,255,.55);
+    }
+
+    .day.selected .day-num {
+      color: var(--neon);
+    }
+
+    .day-top-right {
+      min-width: 28px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--badge-text);
+      background: linear-gradient(180deg, var(--badge-bg1), var(--badge-bg2));
+      box-shadow: 0 3px 10px rgba(0,0,0,.18);
+      text-align: center;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .day-top-right.locked {
+      min-width: auto;
+      height: auto;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      color: rgba(255,255,255,.54);
+      font-size: 13px;
+    }
+
+    .day-bookings {
+      margin-top: auto;
+      min-height: 112px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 7px;
+      position: relative;
+    }
+
+    .booking-text {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 24px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .signal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex: 0 0 10px;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .signal-normal {
+      color: var(--neon);
+      background: var(--neon);
+    }
+
+    .signal-priority {
+      color: var(--coral);
+      background: var(--coral);
+    }
+
+    .empty-note {
+      margin-top: auto;
+      min-height: 68px;
+      display: flex;
+      align-items: flex-end;
+      padding-top: calc(1.5em + 18px);
+      color: rgba(255,255,255,.45);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .full-ribbon {
+      position: absolute;
+      left: 50%;
+      top: calc(50% + 24px);
+      transform: translate(-50%, -50%) rotate(345deg);
+      padding: 10px 22px;
+      border-radius: 14px;
+      background: rgba(28,28,28,.96);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      border: 3px solid rgba(255,255,255,.76);
+      box-shadow: 0 0 18px rgba(255,255,255,.22), 0 8px 18px rgba(0,0,0,.32);
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .day-pop {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      transform: translate(-50%, -50%) scale(.96);
+      width: 280px;
+      max-width: min(92vw, 280px);
+      padding: 16px 18px;
+      border-radius: 28px;
+      background: var(--day-bg);
+      border: 4px solid rgba(255,255,255,.6);
+      box-shadow: 0 20px 46px rgba(0,0,0,.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .16s ease, transform .16s ease;
+      z-index: 9999;
+      overflow-wrap: anywhere;
+    }
+
+    .day.col-0 .day-pop,
+    .day.col-1 .day-pop {
+      left: 10px;
+      right: auto;
+      transform: translate(0, -50%) scale(.96);
+    }
+
+    .day.col-5 .day-pop,
+    .day.col-6 .day-pop {
+      left: auto;
+      right: 10px;
+      transform: translate(0, -50%) scale(.96);
+    }
+
+    .day.has-info:hover .day-pop,
+    .day.has-info:focus-within .day-pop {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .day.col-0.has-info:hover .day-pop,
+    .day.col-0.has-info:focus-within .day-pop,
+    .day.col-1.has-info:hover .day-pop,
+    .day.col-1.has-info:focus-within .day-pop,
+    .day.col-5.has-info:hover .day-pop,
+    .day.col-5.has-info:focus-within .day-pop,
+    .day.col-6.has-info:hover .day-pop,
+    .day.col-6.has-info:focus-within .day-pop {
+      transform: translate(0, -50%) scale(1);
+    }
+
+    .day-pop-title {
+      margin-bottom: 10px;
+      font-size: 17px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .day-pop-divider {
+      height: 1px;
+      margin: 10px 0 12px;
+      background: rgba(255,255,255,.18);
+    }
+
+    .day-pop-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .day-pop-full {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 12px 14px 14px;
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .legend-normal { color: var(--neon); background: var(--neon); }
+    .legend-priority { color: var(--coral); background: var(--coral); }
+    .legend-locked { color: #94a3b8; background: #94a3b8; }
+
+    .bottom-layout {
+      display: grid;
+      grid-template-columns: 1.06fr .94fr;
+      gap: 20px;
+    }
+
+    .section {
+      padding: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: clamp(20px, 2.2vw, 24px);
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .message {
+      display: none;
+      margin-top: 10px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 900;
+      border: 2px solid rgba(255,255,255,.14);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.16);
+      line-height: 1.6;
+    }
+
+    .message.show { display: block; }
+
+    .message.error {
+      color: #fff2f5;
+      background: linear-gradient(180deg, rgba(255,117,152,.92), rgba(220,60,98,.9));
+    }
+
+    .message.success {
+      color: #09210f;
+      background: linear-gradient(180deg, rgba(128,246,150,.96), rgba(54,202,88,.96));
+    }
+
+    form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .desktop-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .field label {
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.4;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: rgba(255,255,255,.88);
+      line-height: 1.5;
+    }
+
+    .input-wrap {
+      position: relative;
+      width: 100%;
+      height: 52px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[list] {
+      width: 100%;
+      min-width: 0;
+      height: 52px;
+      padding: 13px 14px;
+      border: 2px solid rgba(255,255,255,.18);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02)),
+        rgba(15, 18, 39, .82);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.1), inset 0 -3px 0 rgba(0,0,0,.14);
+      transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    input:focus {
+      border-color: rgba(74,222,128,.58);
+      transform: translateY(-1px);
+    }
+
+    input[type="date"] {
+      color-scheme: dark;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: invert(1) brightness(1.15);
+      opacity: .9;
+    }
+
+    #username::placeholder,
+    #cpName::placeholder,
+    #levelInput::placeholder {
+      color: rgba(255,255,255,.48);
+    }
+
+    .lv-inline {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,.88);
+      font-size: 13px;
+      font-weight: 900;
+      pointer-events: none;
+    }
+
+    .level-single input {
+      padding-right: 48px;
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 56px;
+      gap: 10px;
+      align-items: center;
+      min-height: 52px;
+    }
+
+    .calendar-trigger {
+      width: 56px;
+      height: 52px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      color: #061208;
+      font-size: 24px;
+      font-weight: 900;
+      background: linear-gradient(180deg, #7eff9b, #2ddd57);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.42), inset 0 -3px 0 rgba(0,0,0,.18), 0 8px 16px rgba(0,0,0,.28);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 3px;
+    }
+
+    .btn-green {
+      min-height: 50px;
+      padding: 0 22px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #74ff94, #1fd14f);
+      color: #09210f;
+      font-size: 15px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.3), inset 0 -4px 0 rgba(0,0,0,.2), 0 8px 16px rgba(0,0,0,.24);
+    }
+
+    .btn-dark {
+      min-height: 50px;
+      padding: 0 22px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #6d7ab5, #37446f);
+      color: #fff;
+      font-size: 15px;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.12), inset 0 -4px 0 rgba(0,0,0,.3), 0 8px 16px rgba(0,0,0,.24);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .submit-cooldown {
+      opacity: .38 !important;
+      cursor: not-allowed !important;
+      filter: grayscale(.2);
+    }
+
+    .foot-note {
+      margin-top: 8px;
+      color: rgba(255,255,255,.88);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .rules {
+      display: grid;
+      gap: 12px;
+    }
+
+    .rule-block {
+      padding: 15px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)), rgba(10,12,28,.72);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .rule-block .plain-lines {
+      color: rgba(255,255,255,.88);
+      font-size: 14px;
+      line-height: 1.75;
+      white-space: pre-line;
+    }
+
+    .mini-calendar-pop {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      z-index: 100;
+      width: 320px;
+      max-width: calc(100vw - 32px);
+      padding: 14px;
+      border-radius: 22px;
+      border: 1px solid rgba(74,222,128,.26);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)), rgba(6,8,20,.97);
+      box-shadow: 0 18px 38px rgba(0,0,0,.46);
+      display: none;
+    }
+
+    .mini-calendar-pop.show {
+      display: block;
+    }
+
+    .mini-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .mini-head-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .mini-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mini-nav button {
+      width: 34px;
+      height: 34px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(180deg, #7eff9b, #2ddd57);
+      color: #09140b;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .mini-weekday {
+      text-align: center;
+      padding: 4px 0;
+      color: #f0fff4;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .mini-day {
+      height: 36px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)), rgba(22,28,55,.96);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .mini-day.disabled {
+      opacity: .32;
+      cursor: not-allowed;
+    }
+
+    .mini-day.selected {
+      background: linear-gradient(180deg, #7eff9b, #2ddd57);
+      color: #071809;
+    }
+
+    .mini-day.today {
+      outline: 2px solid rgba(74,222,128,.62);
+      outline-offset: 1px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0,0,0,.68);
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .popup {
+      width: 100%;
+      max-width: 525px;
+      max-height: min(90vh, 760px);
+      border-radius: 28px;
+      background: #140b35;
+      border: 3px solid rgba(74,222,128,.42);
+      box-shadow: 0 0 36px rgba(74,222,128,.12), 0 24px 60px rgba(0,0,0,.54);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-head {
+      padding: 26px 20px 10px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .popup-icon-wrap {
+      width: 106px;
+      height: 106px;
+      margin: 0 auto 18px;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(180deg, #5ef088, #39d76b);
+      box-shadow: inset 0 -10px 0 rgba(0,0,0,.14);
+    }
+
+    .popup-icon {
+      width: 50px;
+      height: 50px;
+    }
+
+    .popup-title {
+      margin: 0 0 8px;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .popup-subtitle {
+      margin-bottom: 18px;
+      color: var(--neon);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .4em;
+      text-transform: uppercase;
+    }
+
+    .popup-body {
+      padding: 0 28px 20px;
+      min-height: 0;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-scroll-wrap {
+      padding: 18px 8px 18px 18px;
+      border-radius: 28px;
+      background: rgba(0,0,0,.44);
+      min-height: 0;
+    }
+
+    .popup-scroll {
+      max-height: 292px;
+      overflow-y: auto;
+      padding-right: 16px;
+      color: rgba(255,255,255,.95);
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .popup-scroll::-webkit-scrollbar { width: 8px; }
+
+    .popup-scroll::-webkit-scrollbar-thumb {
+      background: var(--neon);
+      border-radius: 999px;
+    }
+
+    .rule-row {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .rule-num {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: rgba(74,222,128,.12);
+      color: var(--neon);
+      font-size: 18px;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+
+    .rule-text-pop strong { color: var(--neon); }
+
+    .popup-bottom-read {
+      margin-top: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 1.6;
+    }
+
+    .popup-inline-message {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.5;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .popup-inline-message.show {
+      display: block;
+    }
+
+    .popup-inline-message.error {
+      color: #fff2f5;
+      background: linear-gradient(180deg, rgba(255,117,152,.92), rgba(220,60,98,.9));
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+      padding: 0 28px 28px;
+      flex-shrink: 0;
+    }
+
+    .popup-actions .btn {
+      flex: 1;
+      min-height: 56px;
+      border-radius: 20px;
+    }
+
+    .popup-submit-ready {
+      opacity: 1 !important;
+      cursor: pointer !important;
+      filter: none !important;
+    }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0,0,0,0) !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+
+    @media (max-width: 980px) {
+      .bottom-layout { grid-template-columns: 1fr; }
+
+      .calendar-topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .month-controls {
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 12px;
+      }
+
+      .hero {
+        padding: 18px;
+      }
+
+      .calendar-topbar,
+      .section {
+        padding: 16px;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .calendar-card {
+        overflow: hidden;
+      }
+
+      .calendar-shell {
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .calendar-card:hover .calendar-shell,
+      .calendar-card:focus-within .calendar-shell {
+        max-height: none;
+      }
+
+      .calendar-grid {
+        min-width: 760px;
+      }
+
+      .day {
+        min-height: 148px;
+        padding: 9px 9px;
+      }
+
+      .weekday {
+        padding: 8px 4px;
+        font-size: 13px;
+      }
+
+      .day-num {
+        font-size: 22px;
+      }
+
+      .booking-text,
+      .empty-note {
+        font-size: 11px;
+      }
+
+      .day-top-right {
+        font-size: 10px;
+        min-width: 26px;
+        height: 16px;
+      }
+
+      .full-ribbon {
+        font-size: 13px;
+        padding: 8px 16px;
+        border-width: 2px;
+        border-radius: 11px;
+      }
+
+      .day-pop {
+        position: fixed;
+        left: 50% !important;
+        right: auto !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) scale(.92) !important;
+        width: min(88vw, 300px);
+        max-width: min(88vw, 300px);
+        z-index: 10000;
+        border-radius: 22px;
+        padding: 14px;
+      }
+
+      .day.has-info:hover .day-pop,
+      .day.has-info:focus-within .day-pop,
+      .day.has-info:active .day-pop,
+      .day.has-info.mobile-open .day-pop {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1) !important;
+      }
+
+      .desktop-row {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions .btn,
+      .form-actions a {
+        width: 100%;
+      }
+
+      .popup-title {
+        font-size: 22px;
+      }
+
+      .popup-subtitle {
+        letter-spacing: .22em;
+        font-size: 11px;
+      }
+
+      .popup-body {
+        padding: 0 16px 16px;
+      }
+
+      .popup-actions {
+        padding: 0 16px 16px;
+        flex-direction: column;
+      }
+
+      .mini-calendar-pop {
+        width: min(320px, calc(100vw - 24px));
+        left: 0;
+        right: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="ui-card hero">
-      <h1>大神贊助預約系統</h1>
-      <p>Status: Online</p>
-    </section>
+  <div class="wrap">
+    <section class="ui-card hero">
+      <h1>大神贊助預約系統</h1>
+      <p>Status: Online</p>
+    </section>
 
-    <section class="ui-card calendar-card" id="calendarCard" aria-label="大神贊助月曆">
-      <div class="calendar-topbar">
-        <div class="calendar-title-wrap">
-          <h2 class="calendar-title" id="monthTitle">2026年 3月</h2>
-          <div class="mode-badge">
-            <span class="dot"></span>
-            <span id="modeText">兩週預覽模式</span>
-          </div>
-        </div>
+    <section class="ui-card calendar-card" id="calendarCard" aria-label="大神贊助月曆">
+      <div class="calendar-topbar">
+        <div class="calendar-title-wrap">
+          <h2 class="calendar-title" id="monthTitle">2026年 3月</h2>
+          <div class="mode-badge">
+            <span class="dot"></span>
+            <span id="modeText">兩週預覽模式</span>
+          </div>
+        </div>
 
-        <div class="month-controls">
-          <button class="btn icon-btn" type="button" id="prevMonthBtn" aria-label="上個月">&lt;</button>
-          <button class="btn icon-btn" type="button" id="nextMonthBtn" aria-label="下個月">&gt;</button>
-        </div>
-      </div>
+        <div class="month-controls">
+          <button class="btn icon-btn" type="button" id="prevMonthBtn" aria-label="上個月">&lt;</button>
+          <button class="btn icon-btn" type="button" id="nextMonthBtn" aria-label="下個月">&gt;</button>
+        </div>
+      </div>
 
-      <div class="calendar-shell" id="calendarShell">
-        <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="calendar-shell" id="calendarShell">
+        <div class="calendar-grid" id="calendarGrid"></div>
 
-        <div class="legend">
-          <div class="legend-item"><span class="legend-dot legend-normal"></span> 一般預約</div>
-          <div class="legend-item"><span class="legend-dot legend-priority"></span> 優先預約</div>
-          <div class="legend-item"><span class="legend-dot legend-locked"></span> 即將開放</div>
-        </div>
-      </div>
-    </section>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot legend-normal"></span> 一般預約</div>
+          <div class="legend-item"><span class="legend-dot legend-priority"></span> 優先預約</div>
+          <div class="legend-item"><span class="legend-dot legend-locked"></span> 即將開放</div>
+        </div>
+      </div>
+    </section>
 
-    <section class="bottom-layout">
-      <div class="ui-card">
-        <div class="section">
-          <h2 class="section-title">預約資訊</h2>
+    <section class="bottom-layout">
+      <div class="ui-card">
+        <div class="section">
+          <h2 class="section-title">預約資訊</h2>
 
-          <form id="bookingForm" novalidate>
-            <div class="desktop-row">
-              <div class="field">
-                <label for="username">會員帳號（需為＠ID）</label>
-                <input id="username" name="username" type="text" placeholder="abc123" autocomplete="off" />
-                <div class="hint">請填寫@ 後正確英數 ID，非中文暱稱</div>
-              </div>
+          <form id="bookingForm" novalidate>
+            <div class="desktop-row">
+              <div class="field">
+                <label for="username">會員帳號（需為＠ID）</label>
+                <input id="username" name="username" type="text" placeholder="abc123" autocomplete="off" />
+                <div class="hint">請填寫 @ 後正確英數 ID，非中文暱稱</div>
+              </div>
 
-              <div class="field">
-                <label for="cpName">推薦主播（需為＠ID）</label>
-                <input id="cpName" name="cpName" type="text" placeholder="abc123" autocomplete="off" />
-                <div class="hint">請填寫@ 後正確英數 ID，非中文暱稱</div>
-              </div>
+              <div class="field">
+                <label for="cpName">推薦主播（需為＠ID）</label>
+                <input id="cpName" name="cpName" type="text" placeholder="abc123" autocomplete="off" />
+                <div class="hint">請填寫 @ 後正確英數 ID，非中文暱稱</div>
+              </div>
 
-              <div class="field">
-                <label for="levelInput">會員當前等級</label>
-                <div class="input-wrap level-single">
-                  <input id="levelInput" name="levelInput" type="text" list="levelList" inputmode="numeric" />
-                  <span class="lv-inline">LV</span>
-                </div>
-                <datalist id="levelList"></datalist>
-              </div>
+              <div class="field">
+                <label for="levelInput">會員當前等級</label>
+                <div class="input-wrap level-single">
+                  <input id="levelInput" name="levelInput" type="text" list="levelList" inputmode="numeric" placeholder="50" />
+                  <span class="lv-inline">LV</span>
+                </div>
+                <datalist id="levelList"></datalist>
+              </div>
 
-              <div class="field" style="position:relative;" id="dateFieldWrap">
-                <label for="bookingDate">曝光日期</label>
-                <div class="date-row">
-                  <input id="bookingDate" name="bookingDate" type="date" />
-                  <button class="calendar-trigger" type="button" id="miniCalendarBtn" aria-label="開啟迷你月曆">📅</button>
-                </div>
+              <div class="field" style="position:relative;" id="dateFieldWrap">
+                <label for="bookingDate">曝光日期</label>
+                <div class="date-row">
+                  <input id="bookingDate" name="bookingDate" type="date" />
+                  <button class="calendar-trigger" type="button" id="miniCalendarBtn" aria-label="開啟迷你月曆">📅</button>
+                </div>
 
-                <div class="mini-calendar-pop" id="miniCalendarPop">
-                  <div class="mini-head">
-                    <div class="mini-head-title" id="miniTitle"></div>
-                    <div class="mini-nav">
-                      <button type="button" id="miniPrevBtn">&lt;</button>
-                      <button type="button" id="miniNextBtn">&gt;</button>
-                    </div>
-                  </div>
-                  <div class="mini-grid" id="miniCalendarGrid"></div>
-                </div>
-              </div>
-            </div>
+                <div class="mini-calendar-pop" id="miniCalendarPop" aria-hidden="true">
+                  <div class="mini-head">
+                    <div class="mini-head-title" id="miniTitle"></div>
+                    <div class="mini-nav">
+                      <button type="button" id="miniPrevBtn" aria-label="上個月">&lt;</button>
+                      <button type="button" id="miniNextBtn" aria-label="下個月">&gt;</button>
+                    </div>
+                  </div>
+                  <div class="mini-grid" id="miniCalendarGrid"></div>
+                </div>
+              </div>
+            </div>
 
-            <div class="form-actions">
-              <button class="btn btn-green" type="submit" id="submitBookingBtn">送出預約</button>
-              <a class="btn btn-dark" id="resetBtn" href="https://swag.live/" target="_blank" rel="noopener noreferrer">線上客服</a>
-            </div>
+            <div class="form-actions">
+              <button class="btn btn-green" type="submit" id="submitBookingBtn">送出預約</button>
+              <a class="btn btn-dark" id="resetBtn" href="https://swag.live/" target="_blank" rel="noopener noreferrer">線上客服</a>
+            </div>
 
-            <div class="message" id="messageBox" role="status" aria-live="polite"></div>
+            <div class="message" id="messageBox" role="status" aria-live="polite"></div>
 
-            <div class="foot-note">
-              預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議預約前先與主播確認可曝光之開播日期。
-            </div>
-          </form>
-        </div>
-      </div>
+            <div class="foot-note">
+              預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議預約前先與主播確認可曝光之開播日期。
+            </div>
+          </form>
+        </div>
+      </div>
 
-      <div class="ui-card">
-        <div class="section">
-          <h2 class="section-title">規則說明</h2>
-          <div class="rules">
-            <div class="rule-block">
-              <div class="plain-lines">一、申請資格與頻率
+      <div class="ui-card">
+        <div class="section">
+          <h2 class="section-title">規則說明</h2>
+          <div class="rules">
+            <div class="rule-block">
+              <div class="plain-lines">一、申請資格與頻率
 Lv.50～Lv.89：每 1 個月 可申請 1 次。
 Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 權益。
 （實際可申請時間將依系統紀錄為準）</div>
-            </div>
+            </div>
 
-            <div class="rule-block">
-              <div class="plain-lines">二、日期開放規則
+            <div class="rule-block">
+              <div class="plain-lines">二、日期開放規則
 1. 當月名額於 每月 1 日起開放預約（當月首日名額可於前一日預約），每日名額有限，額滿即截止。福利無法遞延至次月，亦 無法提前預約次月首日以外之日期。
 2. 每月名額通常於當月中旬即會陸續被預約至月底，如有需求請儘早安排，以免向隅。
 3. 為避免佔用名額影響其他主播權益，預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議您於預約前，先與主播確認可曝光之開播日期。</div>
-            </div>
+            </div>
 
-            <div class="rule-block">
-              <div class="plain-lines">三、名額規則
+            <div class="rule-block">
+              <div class="plain-lines">三、名額規則
 1. 每日一般名額固定為 3 位。
 2. 若一般名額已滿，月曆將清楚顯示 FULL，即一般預約僅可以選擇其他開放預約中的日期。
 3. 月曆只顯示預約成功的推薦主播ID。</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="overlay" id="ruleOverlay" aria-hidden="true">
-    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
-      <div class="popup-head">
-        <div class="popup-icon-wrap">
-          <svg class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="#061208" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"></path>
-            <path d="M9.5 12.2l1.8 1.8 3.5-3.7"></path>
-          </svg>
-        </div>
-        <div class="popup-title" id="popupTitle">預約規則說明</div>
-        <div class="popup-subtitle">Security &amp; Rules Confirmation</div>
-      </div>
-
-      <div class="popup-body">
-        <div class="popup-scroll-wrap">
-          <div class="popup-scroll" id="popupScroll">
-            <div class="rule-row">
-              <div class="rule-num">1</div>
-              <div class="rule-text-pop">
-                <strong>一、申請資格與頻率</strong><br>
-                Lv.50～Lv.89：每 1 個月 可申請 1 次<br>
-                Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 權益<br>
-                （實際可申請時間將依系統紀錄為準）
-              </div>
-            </div>
-
-            <div class="rule-row">
-              <div class="rule-num">2</div>
-              <div class="rule-text-pop">
-                <strong>二、日期開放規則</strong><br>
-                1. 當月名額於 每月 1 日起開放預約（當月首日名額可於前一日預約），每日名額有限，額滿即截止。福利無法遞延至次月，亦 無法提前預約次月首日以外之日期。<br>
-                2. 每月名額通常於當月中旬即會陸續被預約至月底，如有需求請儘早安排，以免向隅。<br>
-                3. 為避免佔用名額影響其他主播權益，預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議您於預約前，先與主播確認可曝光之開播日期。
-              </div>
-            </div>
-
-            <div class="rule-row" style="margin-bottom:0;">
-              <div class="rule-num">3</div>
-              <div class="rule-text-pop">
-                <strong>三、名額規則</strong><br>
-                1. 每日一般名額固定為 3 位。<br>
-                2. 若一般名額已滿，月曆將清楚顯示 FULL，即一般預約僅可以選擇其他開放預約中的日期。<br>
-                3. 月曆只顯示預約成功的推薦主播ID。
-              </div>
-            </div>
-            <div style="height:36px;"></div>
-          </div>
-        </div>
-
-        <div class="popup-bottom-read">請閱讀規則說明，確認無誤後點擊下方「同意且送出」按鈕</div>
-
-        <div class="popup-inline-message" id="popupErrorBox" aria-live="polite"></div>
-      </div>
-
-      <div class="popup-actions">
-        <button class="btn btn-dark" type="button" id="popupCancelBtn">取消</button>
-        <button class="btn btn-green" type="button" id="popupSubmitBtn" disabled>同意且送出</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const STORAGE_KEY = "god_sponsorship_bookings_v19";
-      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjw9C-JYBpfvwT8wPTYaNO7BD1tYx-PRXyRW2tD-cCgmhj4ZEsteZMCrotdtNPt7t_/exec";
-      const BASE_SLOTS_PER_DAY = 3;
-      const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-      const ID_PATTERN = /^[a-z0-9._-]+$/;
-      const JSONP_TIMEOUT = 15000;
-
-      const MOCK_BOOKINGS = [];
-
-      const els = {
-        monthTitle: document.getElementById("monthTitle"),
-        calendarGrid: document.getElementById("calendarGrid"),
-        prevMonthBtn: document.getElementById("prevMonthBtn"),
-        nextMonthBtn: document.getElementById("nextMonthBtn"),
-        bookingForm: document.getElementById("bookingForm"),
-        username: document.getElementById("username"),
-        levelInput: document.getElementById("levelInput"),
-        cpName: document.getElementById("cpName"),
-        bookingDate: document.getElementById("bookingDate"),
-        messageBox: document.getElementById("messageBox"),
-        resetBtn: document.getElementById("resetBtn"),
-        submitBookingBtn: document.getElementById("submitBookingBtn"),
-        calendarShell: document.getElementById("calendarShell"),
-        modeText: document.getElementById("modeText"),
-        miniCalendarBtn: document.getElementById("miniCalendarBtn"),
-        miniCalendarPop: document.getElementById("miniCalendarPop"),
-        miniCalendarGrid: document.getElementById("miniCalendarGrid"),
-        miniTitle: document.getElementById("miniTitle"),
-        miniPrevBtn: document.getElementById("miniPrevBtn"),
-        miniNextBtn: document.getElementById("miniNextBtn"),
-        levelList: document.getElementById("levelList"),
-        ruleOverlay: document.getElementById("ruleOverlay"),
-        popupSubmitBtn: document.getElementById("popupSubmitBtn"),
-        popupCancelBtn: document.getElementById("popupCancelBtn"),
-        popupScroll: document.getElementById("popupScroll"),
-        popupErrorBox: document.getElementById("popupErrorBox"),
-        dateFieldWrap: document.getElementById("dateFieldWrap"),
-        calendarCard: document.getElementById("calendarCard")
-      };
-
-      const today = startOfDay(new Date());
-      let bookings = loadBookings();
-      let selectedDateStr = "";
-      let viewYear = today.getFullYear();
-      let viewMonth = today.getMonth();
-      let miniYear = today.getFullYear();
-      let miniMonth = today.getMonth();
-      let pendingSubmission = null;
-      let cooldownTimer = null;
-      let popupScrolledToBottom = false;
-
-      init();
-
-      async function init() {
-        populateLevelList();
-        applyDateInputLimits();
-        bindEvents();
-        renderCalendar();
-        renderMiniCalendar();
-        await syncBookingsFromGoogleSheet();
-        renderCalendar();
-        renderMiniCalendar();
-      }
-
-      function populateLevelList() {
-        els.levelList.innerHTML = "";
-        for (let i = 50; i <= 100; i++) {
-          const option = document.createElement("option");
-          option.value = String(i);
-          els.levelList.appendChild(option);
-        }
-      }
-
-      function bindEvents() {
-        els.username.addEventListener("blur", normalizeIdInput);
-        els.cpName.addEventListener("blur", normalizeIdInput);
-
-        els.levelInput.addEventListener("input", () => {
-          const converted = normalizeNumberString(els.levelInput.value);
-          els.levelInput.value = converted.replace(/[^\d]/g, "");
-        });
-
-        els.bookingDate.addEventListener("change", () => {
-          selectedDateStr = els.bookingDate.value || "";
-          if (selectedDateStr) {
-            const d = parseDateString(selectedDateStr);
-            viewYear = d.getFullYear();
-            viewMonth = d.getMonth();
-            miniYear = d.getFullYear();
-            miniMonth = d.getMonth();
-            renderCalendar();
-            renderMiniCalendar();
-          }
-        });
-
-        els.bookingDate.addEventListener("pointerdown", handleDateFieldOpen);
-        els.bookingDate.addEventListener("focus", handleDateFieldOpen);
-        els.bookingDate.addEventListener("click", handleDateFieldOpen);
-
-        if (els.dateFieldWrap) {
-          els.dateFieldWrap.addEventListener("click", (e) => {
-            if (e.target !== els.miniCalendarBtn && !els.miniCalendarPop.contains(e.target)) {
-              goToCalendarFromDateField();
-            }
-          });
-        }
-
-        els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
-        els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
-
-        els.bookingForm.addEventListener("submit", handleSubmit);
-
-        const setPreviewMode = () => { els.modeText.textContent = "兩週預覽模式"; };
-        const setFullMode = () => { els.modeText.textContent = "全月存取模式"; };
-
-        els.calendarShell.addEventListener("mouseenter", setFullMode);
-        els.calendarShell.addEventListener("mouseleave", setPreviewMode);
-        els.calendarShell.addEventListener("focusin", setFullMode);
-        els.calendarShell.addEventListener("focusout", () => {
-          setTimeout(() => {
-            if (!els.calendarShell.contains(document.activeElement)) setPreviewMode();
-          }, 0);
-        });
-
-        els.miniCalendarBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const baseDate = selectedDateStr ? parseDateString(selectedDateStr) : new Date(viewYear, viewMonth, 1);
-          miniYear = baseDate.getFullYear();
-          miniMonth = baseDate.getMonth();
-          renderMiniCalendar();
-          toggleMiniCalendar();
-        });
-
-        els.miniPrevBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const next = new Date(miniYear, miniMonth - 1, 1);
-          miniYear = next.getFullYear();
-          miniMonth = next.getMonth();
-          renderMiniCalendar();
-        });
-
-        els.miniNextBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const next = new Date(miniYear, miniMonth + 1, 1);
-          miniYear = next.getFullYear();
-          miniMonth = next.getMonth();
-          renderMiniCalendar();
-        });
-
-        document.addEventListener("click", (e) => {
-          if (!els.miniCalendarPop.contains(e.target) && e.target !== els.miniCalendarBtn) {
-            closeMiniCalendar();
-          }
-        });
-
-        els.popupSubmitBtn.addEventListener("click", finalizeSubmission);
-        els.popupCancelBtn.addEventListener("click", closePopup);
-        els.ruleOverlay.addEventListener("click", (e) => {
-          if (e.target === els.ruleOverlay) closePopup();
-        });
-
-        els.popupScroll.addEventListener("scroll", handlePopupScroll);
-      }
-
-      function loadBookings() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_BOOKINGS));
-          return [];
-        }
-        try {
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [];
-          return sortBookings(parsed);
-        } catch {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-          return [];
-        }
-      }
-
-      function saveBookings() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-      }
-
-      function sortBookings(list) {
-        return [...list].sort((a, b) => {
-          const aPriority = a.priority ? 1 : 0;
-          const bPriority = b.priority ? 1 : 0;
-          if (a.date !== b.date) return a.date.localeCompare(b.date);
-          if (aPriority !== bPriority) return aPriority - bPriority;
-          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-        });
-      }
-
-      function normalizeIdInput(event) {
-        event.target.value = String(event.target.value || "").trim();
-      }
-
-      function normalizeNumberString(value) {
-        return String(value || "").replace(/[０-９]/g, ch =>
-          String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
-        );
-      }
-
-      function startOfDay(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      }
-
-      function parseDateString(dateStr) {
-        if (!dateStr) return null;
-        const [y, m, d] = dateStr.split("-").map(Number);
-        if (!y || !m || !d) return null;
-        return new Date(y, m - 1, d);
-      }
-
-      function formatDateString(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
-      }
-
-      function monthKeyFromDateStr(dateStr) {
-        return dateStr.slice(0, 7);
-      }
-
-      function isEndOfMonth(date) {
-        return date.getDate() === new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-      }
-
-      function isDateBookable(date) {
-        const target = startOfDay(date);
-        if (target < today) return false;
-
-        const currentMonthKey = monthKeyFromDateStr(formatDateString(today));
-        const targetMonthKey = monthKeyFromDateStr(formatDateString(target));
-
-        if (targetMonthKey === currentMonthKey) return true;
-
-        if (isEndOfMonth(today)) {
-          const nextFirst = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-          return target.getTime() === nextFirst.getTime();
-        }
-
-        return false;
-      }
-
-      function applyDateInputLimits() {
-        els.bookingDate.min = formatDateString(today);
-      }
-
-      function containsUppercase(value) {
-        return /[A-Z]/.test(String(value || ""));
-      }
-
-      function normalizeAtId(value) {
-        let v = String(value || "").trim();
-        if (!v) return "";
-        if (v.startsWith("@")) v = v.slice(1);
-        return "@" + v;
-      }
-
-      function validateFlexibleId(value, type) {
-        if (!value) return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
-        if (containsUppercase(value)) return "ID請填寫小寫英文字母";
-        let v = String(value).trim();
-        if (v.startsWith("@")) v = v.slice(1);
-        if (!v || !ID_PATTERN.test(v)) {
-          return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
-        }
-        return "";
-      }
-
-      function validateLevel(levelRaw) {
-        const normalized = normalizeNumberString(levelRaw).replace(/[^\d]/g, "");
-        if (!normalized) return "請提交正確的帳號等級";
-        const level = Number(normalized);
-        if (!Number.isInteger(level)) return "請提交正確的帳號等級";
-        if (level < 50) return "此福利僅開放於50等以上之會員";
-        return "";
-      }
-
-      function getMonthlyLimit(level) {
-        return level >= 90 ? 2 : 1;
-      }
-
-      function getBookingsForDate(dateStr) {
-        return sortBookings(bookings.filter(item => item.date === dateStr));
-      }
-
-      function getRegularBookingsForDate(dateStr) {
-        return getBookingsForDate(dateStr).filter(item => !item.priority);
-      }
-
-      function getRemainingBaseSlots(dateStr) {
-        const used = getRegularBookingsForDate(dateStr).length;
-        return Math.max(0, BASE_SLOTS_PER_DAY - used);
-      }
-
-      function getBookedCountForBadge(dateStr) {
-        return getRegularBookingsForDate(dateStr).length;
-      }
-
-      function getUserMonthlyBookingsCount(username, monthKey) {
-        return bookings.filter(item =>
-          item.username === username && monthKeyFromDateStr(item.date) === monthKey
-        ).length;
-      }
-
-      function hasSameCpOnDate(dateStr, cpName) {
-        return bookings.some(item => item.date === dateStr && item.cpName === cpName);
-      }
-
-      function validateSubmission(data) {
-        const usernameError = validateFlexibleId(data.username, "user");
-        if (usernameError) return usernameError;
-
-        const cpError = validateFlexibleId(data.cpName, "cp");
-        if (cpError) return cpError;
-
-        const levelError = validateLevel(data.level);
-        if (levelError) return levelError;
-
-        if (!data.date) return "請選擇曝光日期";
-
-        const targetDate = parseDateString(data.date);
-        if (!targetDate || Number.isNaN(targetDate.getTime())) return "曝光日期格式錯誤";
-
-        if (!isDateBookable(targetDate)) {
-          return "此日期不在可預約範圍內";
-        }
-
-        const normalizedLevel = normalizeNumberString(data.level).replace(/[^\d]/g, "");
-        const level = Number(normalizedLevel);
-        const monthKey = monthKeyFromDateStr(data.date);
-        const count = getUserMonthlyBookingsCount(data.username, monthKey);
-        const limit = getMonthlyLimit(level);
-
-        if (count >= limit) {
-          return level >= 90 ? "Lv.90 以上：每 1 個月僅限申請 2 次" : "Lv.50～Lv.89：每 1 個月僅限申請 1 次";
-        }
-
-        if (hasSameCpOnDate(data.date, data.cpName)) {
-          return "相同日期中，相同主播ID僅限預約一次";
-        }
-
-        const remaining = getRemainingBaseSlots(data.date);
-        if (remaining <= 0 && level < 90) {
-          return "您選擇的日期名額已滿";
-        }
-
-        return "";
-      }
-
-      function showMessage(text, type = "success") {
-        els.messageBox.textContent = text;
-        els.messageBox.className = `message show ${type}`;
-      }
-
-      function clearMessage() {
-        els.messageBox.textContent = "";
-        els.messageBox.className = "message";
-      }
-
-      function showPopupError(text) {
-        els.popupErrorBox.textContent = text;
-        els.popupErrorBox.className = "popup-inline-message show error";
-      }
-
-      function clearPopupError() {
-        els.popupErrorBox.textContent = "";
-        els.popupErrorBox.className = "popup-inline-message";
-      }
-
-      function updatePopupSubmitState() {
-        const shouldEnable = popupScrolledToBottom;
-        els.popupSubmitBtn.disabled = !shouldEnable;
-
-        if (shouldEnable) {
-          els.popupSubmitBtn.classList.add("popup-submit-ready");
-        } else {
-          els.popupSubmitBtn.classList.remove("popup-submit-ready");
-        }
-      }
-
-      function handlePopupScroll() {
-        const el = els.popupScroll;
-        const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
-        if (reachedBottom) {
-          popupScrolledToBottom = true;
-          updatePopupSubmitState();
-        }
-      }
-
-      function startSubmitCooldown() {
-        const btn = els.submitBookingBtn;
-        btn.disabled = true;
-        btn.classList.add("submit-cooldown");
-        let remaining = 45;
-        btn.textContent = `送出預約（${remaining}s）`;
-
-        clearInterval(cooldownTimer);
-        cooldownTimer = setInterval(() => {
-          remaining -= 1;
-          if (remaining <= 0) {
-            clearInterval(cooldownTimer);
-            btn.disabled = false;
-            btn.classList.remove("submit-cooldown");
-            btn.textContent = "送出預約";
-            return;
-          }
-          btn.textContent = `送出預約（${remaining}s）`;
-        }, 1000);
-      }
-
-      function sendBookingToGoogleSheet(bookingData) {
-        return new Promise((resolve, reject) => {
-          const callbackName = `jsonpCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-          const script = document.createElement("script");
-          const params = new URLSearchParams({
-            action: "write",
-            callback: callbackName,
-            username: bookingData.username,
-            level: String(bookingData.level),
-            cpName: bookingData.cpName,
-            date: bookingData.date,
-            priority: String(bookingData.priority)
-          });
-
-          let timer = null;
-
-          function cleanup() {
-            if (timer) clearTimeout(timer);
-            if (script.parentNode) script.parentNode.removeChild(script);
-            try {
-              delete window[callbackName];
-            } catch {
-              window[callbackName] = undefined;
-            }
-          }
-
-          window[callbackName] = function(result) {
-            cleanup();
-            if (!result || result.success !== true) {
-              reject(new Error(result && result.message ? result.message : "寫入失敗"));
-              return;
-            }
-            resolve(result);
-          };
-
-          script.onerror = function() {
-            cleanup();
-            reject(new Error("無法連線至 Google Apps Script，請確認部署網址與存取權限"));
-          };
-
-          timer = setTimeout(() => {
-            cleanup();
-            reject(new Error("連線逾時，請稍後再試"));
-          }, JSONP_TIMEOUT);
-
-          script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
-          document.body.appendChild(script);
-        });
-      }
-
-      function fetchBookingsFromGoogleSheet() {
-        return new Promise((resolve, reject) => {
-          const callbackName = `jsonpReadCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-          const script = document.createElement("script");
-          const params = new URLSearchParams({
-            action: "read",
-            callback: callbackName
-          });
-
-          let timer = null;
-
-          function cleanup() {
-            if (timer) clearTimeout(timer);
-            if (script.parentNode) script.parentNode.removeChild(script);
-            try {
-              delete window[callbackName];
-            } catch {
-              window[callbackName] = undefined;
-            }
-          }
-
-          window[callbackName] = function(result) {
-            cleanup();
-            if (!result || result.success !== true || !Array.isArray(result.bookings)) {
-              reject(new Error(result && result.message ? result.message : "讀取失敗"));
-              return;
-            }
-            resolve(result.bookings);
-          };
-
-          script.onerror = function() {
-            cleanup();
-            reject(new Error("無法讀取 Google 試算表資料，請確認 Apps Script 部署與權限"));
-          };
-
-          timer = setTimeout(() => {
-            cleanup();
-            reject(new Error("讀取資料逾時，請稍後再試"));
-          }, JSONP_TIMEOUT);
-
-          script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
-          document.body.appendChild(script);
-        });
-      }
-
-      async function syncBookingsFromGoogleSheet() {
-        try {
-          const sheetBookings = await fetchBookingsFromGoogleSheet();
-
-          bookings = sortBookings(
-            sheetBookings.map(item => ({
-              username: normalizeAtId(String(item.username || "").trim()),
-              level: Number(item.level || 0),
-              cpName: String(item.cpName || "").trim().startsWith("@")
-                ? String(item.cpName || "").trim()
-                : normalizeAtId(String(item.cpName || "").trim()),
-              date: String(item.date || "").trim(),
-              priority: Boolean(item.priority),
-              createdAt: item.createdAt || new Date().toISOString()
-            }))
-          );
-
-          saveBookings();
-        } catch (error) {
-          console.error("讀取試算表資料失敗：", error);
-        }
-      }
-
-      function handleSubmit(event) {
-        event.preventDefault();
-        clearMessage();
-
-        if (els.submitBookingBtn.disabled) return;
-
-        const rawLevel = normalizeNumberString(String(els.levelInput.value || "")).replace(/[^\d]/g, "");
-        els.levelInput.value = rawLevel;
-
-        const rawData = {
-          username: String(els.username.value || "").trim(),
-          level: rawLevel,
-          cpName: String(els.cpName.value || "").trim(),
-          date: String(els.bookingDate.value || "").trim()
-        };
-
-        const validateData = {
-          username: normalizeAtId(rawData.username),
-          level: rawData.level,
-          cpName: normalizeAtId(rawData.cpName),
-          date: rawData.date
-        };
-
-        const error = validateSubmission(validateData);
-        if (error) {
-          showMessage(error, "error");
-          return;
-        }
-
-        const levelNum = Number(rawData.level);
-        pendingSubmission = {
-          username: normalizeAtId(rawData.username),
-          level: levelNum,
-          cpName: normalizeAtId(rawData.cpName),
-          date: rawData.date,
-          priority: levelNum >= 90 && getRemainingBaseSlots(rawData.date) <= 0
-        };
-
-        openPopup();
-      }
-
-      async function finalizeSubmission() {
-        if (!pendingSubmission) return;
-        if (els.popupSubmitBtn.disabled) return;
-
-        clearPopupError();
-        els.popupSubmitBtn.disabled = true;
-        els.popupSubmitBtn.textContent = "送出中...";
-
-        try {
-          const payload = {
-            username: pendingSubmission.username,
-            level: pendingSubmission.level,
-            cpName: pendingSubmission.cpName,
-            date: pendingSubmission.date,
-            priority: pendingSubmission.priority
-          };
-
-          const sheetResult = await sendBookingToGoogleSheet(payload);
-
-          if (!sheetResult || sheetResult.success !== true) {
-            throw new Error(sheetResult?.message || "寫入失敗");
-          }
-
-          bookings.push({
-            ...pendingSubmission,
-            createdAt: new Date().toISOString()
-          });
-
-          bookings = sortBookings(bookings);
-          saveBookings();
-
-          selectedDateStr = pendingSubmission.date;
-          const bookedDate = parseDateString(pendingSubmission.date);
-          viewYear = bookedDate.getFullYear();
-          viewMonth = bookedDate.getMonth();
-          miniYear = bookedDate.getFullYear();
-          miniMonth = bookedDate.getMonth();
-
-          closePopup();
-          startSubmitCooldown();
-          showMessage(
-            pendingSubmission.priority ? "預約成功，已列為優先預約" : "預約成功",
-            "success"
-          );
-          renderCalendar();
-          renderMiniCalendar();
-
-        } catch (error) {
-          console.error("寫入試算表失敗：", error);
-          showPopupError(`預約資料寫入失敗：${error.message}`);
-          els.popupSubmitBtn.textContent = "同意且送出";
-          updatePopupSubmitState();
-        }
-      }
-
-      function openPopup() {
-        clearPopupError();
-        popupScrolledToBottom = false;
-        els.popupSubmitBtn.textContent = "同意且送出";
-        updatePopupSubmitState();
-
-        els.ruleOverlay.classList.add("show");
-        els.ruleOverlay.setAttribute("aria-hidden", "false");
-
-        requestAnimationFrame(() => {
-          els.popupScroll.scrollTop = 0;
-
-          const noScrollNeeded = els.popupScroll.scrollHeight <= els.popupScroll.clientHeight + 8;
-          if (noScrollNeeded) {
-            popupScrolledToBottom = true;
-            updatePopupSubmitState();
-          }
-        });
-      }
-
-      function closePopup() {
-        els.ruleOverlay.classList.remove("show");
-        els.ruleOverlay.setAttribute("aria-hidden", "true");
-        els.popupSubmitBtn.textContent = "同意且送出";
-        clearPopupError();
-        popupScrolledToBottom = false;
-        updatePopupSubmitState();
-        pendingSubmission = null;
-      }
-
-      function changeMonth(delta) {
-        const next = new Date(viewYear, viewMonth + delta, 1);
-        viewYear = next.getFullYear();
-        viewMonth = next.getMonth();
-        renderCalendar();
-      }
-
-      function handleDateFieldOpen() {
-        goToCalendarFromDateField();
-      }
-
-      function setSelectedDate(dateStr) {
-        const date = parseDateString(dateStr);
-        if (!date) return;
-        selectedDateStr = dateStr;
-        els.bookingDate.value = dateStr;
-        closeMiniCalendar();
-        clearMessage();
-        renderCalendar();
-        renderMiniCalendar();
-      }
-
-      function goToCalendarFromDateField() {
-        const baseDate = selectedDateStr
-          ? parseDateString(selectedDateStr)
-          : (els.bookingDate.value
-              ? parseDateString(els.bookingDate.value)
-              : new Date(viewYear, viewMonth, 1));
-
-        if (baseDate) {
-          viewYear = baseDate.getFullYear();
-          viewMonth = baseDate.getMonth();
-          renderCalendar();
-        }
-
-        requestAnimationFrame(() => {
-          if (els.calendarCard) {
-            els.calendarCard.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-          }
-        });
-      }
-
-      function buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth) {
-        if (!dayBookings.length) return "";
-
-        const regularFull = getRemainingBaseSlots(dateStr) <= 0 && isCurrentMonth && selectable;
-        let lines = `
-          <div class="day-pop">
-            <div class="day-pop-title">${escapeHtml(dateStr)}</div>
-            <div class="day-pop-divider"></div>
-        `;
-
-        dayBookings.forEach((b) => {
-          const cls = b.priority ? "signal-priority" : "signal-normal";
-          lines += `
-            <div class="day-pop-line">
-              <span class="signal-dot ${cls}"></span>
-              <span>${escapeHtml(b.cpName)}</span>
-            </div>
-          `;
-        });
-
-        if (regularFull) {
-          lines += `
-            <div class="day-pop-divider"></div>
-            <div class="day-pop-full">名額已滿 FULL</div>
-          `;
-        }
-
-        lines += `</div>`;
-        return lines;
-      }
-
-      function buildDayCell(date, isCurrentMonth, columnIndex) {
-        const dateStr = formatDateString(date);
-        const dayBookings = getBookingsForDate(dateStr);
-        const bookedForBadge = getBookedCountForBadge(dateStr);
-        const remaining = getRemainingBaseSlots(dateStr);
-        const selectable = isCurrentMonth && isDateBookable(date);
-        const isSelected = selectedDateStr === dateStr;
-        const regularFull = isCurrentMonth && selectable && remaining <= 0;
-        const hasInfo = dayBookings.length > 0;
-        const isPast = isCurrentMonth && startOfDay(date) < today;
-        const showEmptyText = isCurrentMonth && selectable && !isPast && !dayBookings.length;
-
-        const cls = [
-          "day",
-          `col-${columnIndex}`,
-          isCurrentMonth ? "" : "outside-month",
-          selectable ? "selectable" : "locked",
-          isSelected ? "selected" : "",
-          hasInfo ? "has-info" : "",
-          isPast ? "past" : ""
-        ].filter(Boolean).join(" ");
-
-        let topRight = "";
-        if (!isCurrentMonth) {
-          topRight = `<div class="day-top-right locked">即將開放</div>`;
-        } else if (isPast) {
-          topRight = `<div class="day-top-right locked">不開放預約</div>`;
-        } else if (!selectable) {
-          topRight = `<div class="day-top-right locked">即將開放</div>`;
-        } else {
-          topRight = `<div class="day-top-right">${bookedForBadge}/3</div>`;
-        }
-
-        let bookingHtml = "";
-        if (dayBookings.length) {
-          bookingHtml = dayBookings.map(item => {
-            const cls = item.priority ? "signal-priority" : "signal-normal";
-            return `
-              <span class="booking-text" title="${escapeHtml(item.cpName)}">
-                <span class="signal-dot ${cls}"></span>
-                <span>${escapeHtml(item.cpName)}</span>
-              </span>
-            `;
-          }).join("");
-        } else if (showEmptyText) {
-          bookingHtml = `<div class="empty-note">開放預約中</div>`;
-        }
-
-        const fullRibbon = regularFull ? `<div class="full-ribbon">FULL</div>` : "";
-        const popHtml = buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth);
-
-        return `
-          <div class="${cls}" data-date="${dateStr}">
-            ${fullRibbon}
-            <div class="day-header">
-              <div class="day-num">${date.getDate()}</div>
-              ${topRight}
-            </div>
-            <div class="day-bookings">
-              ${bookingHtml}
-            </div>
-            ${popHtml}
-          </div>
-        `;
-      }
-
-      function renderCalendar() {
-        const firstDay = new Date(viewYear, viewMonth, 1);
-        const startWeekday = firstDay.getDay();
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
-        els.monthTitle.textContent = `${viewYear}年 ${viewMonth + 1}月`;
-
-        let html = WEEKDAYS.map(d => `<div class="weekday">${d}</div>`).join("");
-
-        for (let i = 0; i < startWeekday; i++) {
-          const date = new Date(viewYear, viewMonth, i - startWeekday + 1);
-          html += buildDayCell(date, false, i % 7);
-        }
-
-        for (let d = 1; d <= daysInMonth; d++) {
-          const date = new Date(viewYear, viewMonth, d);
-          const cellIndex = startWeekday + (d - 1);
-          html += buildDayCell(date, true, cellIndex % 7);
-        }
-
-        const totalCells = startWeekday + daysInMonth;
-        const remain = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-
-        for (let i = 1; i <= remain; i++) {
-          const date = new Date(viewYear, viewMonth + 1, i);
-          const cellIndex = startWeekday + daysInMonth + (i - 1);
-          html += buildDayCell(date, false, cellIndex % 7);
-        }
-
-        els.calendarGrid.innerHTML = html;
-
-        els.calendarGrid.querySelectorAll(".day.selectable").forEach(el => {
-          el.addEventListener("click", () => setSelectedDate(el.dataset.date));
-        });
-      }
-
-      function toggleMiniCalendar() {
-        els.miniCalendarPop.classList.toggle("show");
-      }
-
-      function closeMiniCalendar() {
-        els.miniCalendarPop.classList.remove("show");
-      }
-
-      function renderMiniCalendar() {
-        const firstDay = new Date(miniYear, miniMonth, 1);
-        const startWeekday = firstDay.getDay();
-        const daysInMonth = new Date(miniYear, miniMonth + 1, 0).getDate();
-
-        els.miniTitle.textContent = `${miniYear}年 ${miniMonth + 1}月`;
-
-        let html = WEEKDAYS.map(d => `<div class="mini-weekday">${d}</div>`).join("");
-
-        for (let i = 0; i < startWeekday; i++) {
-          html += `<div></div>`;
-        }
-
-        for (let d = 1; d <= daysInMonth; d++) {
-          const date = new Date(miniYear, miniMonth, d);
-          const dateStr = formatDateString(date);
-          const disabled = !isDateBookable(date);
-          const isSelected = selectedDateStr === dateStr;
-          const isToday = dateStr === formatDateString(today);
-
-          html += `
-            <button
-              type="button"
-              class="mini-day ${disabled ? "disabled" : ""} ${isSelected ? "selected" : ""} ${isToday ? "today" : ""}"
-              data-date="${dateStr}"
-              ${disabled ? "disabled" : ""}
-            >${d}</button>
-          `;
-        }
-
-        els.miniCalendarGrid.innerHTML = html;
-
-        els.miniCalendarGrid.querySelectorAll(".mini-day:not(.disabled)").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const dateStr = btn.dataset.date;
-            const d = parseDateString(dateStr);
-            viewYear = d.getFullYear();
-            viewMonth = d.getMonth();
-            setSelectedDate(dateStr);
-          });
-        });
-      }
-
-      function escapeHtml(str) {
-        return String(str)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-    })();
-  </script>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="ruleOverlay" aria-hidden="true">
+    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+      <div class="popup-head">
+        <div class="popup-icon-wrap">
+          <svg class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="#061208" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"></path>
+            <path d="M9.5 12.2l1.8 1.8 3.5-3.7"></path>
+          </svg>
+        </div>
+        <div class="popup-title" id="popupTitle">預約規則說明</div>
+        <div class="popup-subtitle">Security &amp; Rules Confirmation</div>
+      </div>
+
+      <div class="popup-body">
+        <div class="popup-scroll-wrap">
+          <div class="popup-scroll" id="popupScroll">
+            <div class="rule-row">
+              <div class="rule-num">1</div>
+              <div class="rule-text-pop">
+                <strong>一、申請資格與頻率</strong><br>
+                Lv.50～Lv.89：每 1 個月 可申請 1 次<br>
+                Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 權益<br>
+                （實際可申請時間將依系統紀錄為準）
+              </div>
+            </div>
+
+            <div class="rule-row">
+              <div class="rule-num">2</div>
+              <div class="rule-text-pop">
+                <strong>二、日期開放規則</strong><br>
+                1. 當月名額於 每月 1 日起開放預約（當月首日名額可於前一日預約），每日名額有限，額滿即截止。福利無法遞延至次月，亦 無法提前預約次月首日以外之日期。<br>
+                2. 每月名額通常於當月中旬即會陸續被預約至月底，如有需求請儘早安排，以免向隅。<br>
+                3. 為避免佔用名額影響其他主播權益，預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議您於預約前，先與主播確認可曝光之開播日期。
+              </div>
+            </div>
+
+            <div class="rule-row" style="margin-bottom:0;">
+              <div class="rule-num">3</div>
+              <div class="rule-text-pop">
+                <strong>三、名額規則</strong><br>
+                1. 每日一般名額固定為 3 位。<br>
+                2. 若一般名額已滿，月曆將清楚顯示 FULL，即一般預約僅可以選擇其他開放預約中的日期。<br>
+                3. 月曆只顯示預約成功的推薦主播ID。
+              </div>
+            </div>
+            <div style="height:36px;"></div>
+          </div>
+        </div>
+
+        <div class="popup-bottom-read">請閱讀規則說明，確認無誤後點擊下方「同意且送出」按鈕</div>
+
+        <div class="popup-inline-message" id="popupErrorBox" aria-live="polite"></div>
+      </div>
+
+      <div class="popup-actions">
+        <button class="btn btn-dark" type="button" id="popupCancelBtn">取消</button>
+        <button class="btn btn-green" type="button" id="popupSubmitBtn" disabled>同意且送出</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "god_sponsorship_bookings_v20";
+      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjw9C-JYBpfvwT8wPTYaNO7BD1tYx-PRXyRW2tD-cCgmhj4ZEsteZMCrotdtNPt7t_/exec";
+      const BASE_SLOTS_PER_DAY = 3;
+      const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
+      const ID_PATTERN = /^[a-z0-9._-]+$/;
+      const JSONP_TIMEOUT = 15000;
+      const SUBMIT_COOLDOWN_SECONDS = 45;
+      const MOBILE_BREAKPOINT = 760;
+
+      const MOCK_BOOKINGS = [];
+
+      const els = {
+        monthTitle: document.getElementById("monthTitle"),
+        calendarGrid: document.getElementById("calendarGrid"),
+        prevMonthBtn: document.getElementById("prevMonthBtn"),
+        nextMonthBtn: document.getElementById("nextMonthBtn"),
+        bookingForm: document.getElementById("bookingForm"),
+        username: document.getElementById("username"),
+        levelInput: document.getElementById("levelInput"),
+        cpName: document.getElementById("cpName"),
+        bookingDate: document.getElementById("bookingDate"),
+        messageBox: document.getElementById("messageBox"),
+        resetBtn: document.getElementById("resetBtn"),
+        submitBookingBtn: document.getElementById("submitBookingBtn"),
+        calendarShell: document.getElementById("calendarShell"),
+        modeText: document.getElementById("modeText"),
+        miniCalendarBtn: document.getElementById("miniCalendarBtn"),
+        miniCalendarPop: document.getElementById("miniCalendarPop"),
+        miniCalendarGrid: document.getElementById("miniCalendarGrid"),
+        miniTitle: document.getElementById("miniTitle"),
+        miniPrevBtn: document.getElementById("miniPrevBtn"),
+        miniNextBtn: document.getElementById("miniNextBtn"),
+        levelList: document.getElementById("levelList"),
+        ruleOverlay: document.getElementById("ruleOverlay"),
+        popupSubmitBtn: document.getElementById("popupSubmitBtn"),
+        popupCancelBtn: document.getElementById("popupCancelBtn"),
+        popupScroll: document.getElementById("popupScroll"),
+        popupErrorBox: document.getElementById("popupErrorBox"),
+        dateFieldWrap: document.getElementById("dateFieldWrap"),
+        calendarCard: document.getElementById("calendarCard")
+      };
+
+      const today = startOfDay(new Date());
+      let bookings = loadBookings();
+      let selectedDateStr = "";
+      let viewYear = today.getFullYear();
+      let viewMonth = today.getMonth();
+      let miniYear = today.getFullYear();
+      let miniMonth = today.getMonth();
+      let pendingSubmission = null;
+      let cooldownTimer = null;
+      let popupScrolledToBottom = false;
+      let lastFocusedElement = null;
+
+      init();
+
+      async function init() {
+        populateLevelList();
+        applyDateInputLimits();
+        bindEvents();
+        renderCalendar();
+        renderMiniCalendar();
+        await syncBookingsFromGoogleSheet();
+        renderCalendar();
+        renderMiniCalendar();
+      }
+
+      function populateLevelList() {
+        els.levelList.innerHTML = "";
+        for (let i = 50; i <= 100; i++) {
+          const option = document.createElement("option");
+          option.value = String(i);
+          els.levelList.appendChild(option);
+        }
+      }
+
+      function bindEvents() {
+        els.username.addEventListener("blur", normalizeIdInput);
+        els.cpName.addEventListener("blur", normalizeIdInput);
+
+        els.levelInput.addEventListener("input", () => {
+          const converted = normalizeNumberString(els.levelInput.value);
+          els.levelInput.value = converted.replace(/[^\d]/g, "");
+        });
+
+        els.bookingDate.addEventListener("change", () => {
+          selectedDateStr = els.bookingDate.value || "";
+          if (selectedDateStr) {
+            const d = parseDateString(selectedDateStr);
+            if (!d) return;
+            viewYear = d.getFullYear();
+            viewMonth = d.getMonth();
+            miniYear = d.getFullYear();
+            miniMonth = d.getMonth();
+            renderCalendar();
+            renderMiniCalendar();
+          }
+        });
+
+        els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
+        els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
+        els.bookingForm.addEventListener("submit", handleSubmit);
+
+        const setPreviewMode = () => { els.modeText.textContent = "兩週預覽模式"; };
+        const setFullMode = () => { els.modeText.textContent = "全月存取模式"; };
+
+        els.calendarShell.addEventListener("mouseenter", setFullMode);
+        els.calendarShell.addEventListener("mouseleave", setPreviewMode);
+        els.calendarShell.addEventListener("focusin", setFullMode);
+        els.calendarShell.addEventListener("focusout", () => {
+          setTimeout(() => {
+            if (!els.calendarShell.contains(document.activeElement)) setPreviewMode();
+          }, 0);
+        });
+
+        els.miniCalendarBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const baseDate = selectedDateStr
+            ? parseDateString(selectedDateStr)
+            : (els.bookingDate.value ? parseDateString(els.bookingDate.value) : new Date(viewYear, viewMonth, 1));
+
+          if (baseDate) {
+            miniYear = baseDate.getFullYear();
+            miniMonth = baseDate.getMonth();
+          }
+
+          renderMiniCalendar();
+          toggleMiniCalendar();
+        });
+
+        els.miniPrevBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const next = new Date(miniYear, miniMonth - 1, 1);
+          miniYear = next.getFullYear();
+          miniMonth = next.getMonth();
+          renderMiniCalendar();
+        });
+
+        els.miniNextBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const next = new Date(miniYear, miniMonth + 1, 1);
+          miniYear = next.getFullYear();
+          miniMonth = next.getMonth();
+          renderMiniCalendar();
+        });
+
+        document.addEventListener("click", handleDocumentClick, true);
+        document.addEventListener("keydown", handleDocumentKeydown);
+
+        els.popupSubmitBtn.addEventListener("click", finalizeSubmission);
+        els.popupCancelBtn.addEventListener("click", closePopup);
+
+        els.ruleOverlay.addEventListener("click", (e) => {
+          if (e.target === els.ruleOverlay) closePopup();
+        });
+
+        els.popupScroll.addEventListener("scroll", handlePopupScroll);
+
+        window.addEventListener("resize", () => {
+          closeMiniCalendar();
+          closeAllDayPops();
+        });
+
+        els.bookingDate.addEventListener("focus", () => {
+          closeMiniCalendar();
+          goToCalendarFromDateField();
+        });
+      }
+
+      function handleDocumentClick(e) {
+        const target = e.target;
+
+        if (
+          els.miniCalendarPop.classList.contains("show") &&
+          !els.miniCalendarPop.contains(target) &&
+          target !== els.miniCalendarBtn
+        ) {
+          closeMiniCalendar();
+        }
+
+        if (window.innerWidth <= MOBILE_BREAKPOINT) {
+          const clickedDay = target.closest(".day.has-info");
+          const clickedInsidePop = target.closest(".day-pop");
+
+          if (clickedInsidePop) return;
+
+          if (clickedDay) {
+            const alreadyOpen = clickedDay.classList.contains("mobile-open");
+            closeAllDayPops();
+            if (!alreadyOpen) {
+              clickedDay.classList.add("mobile-open");
+            }
+          } else {
+            closeAllDayPops();
+          }
+        }
+      }
+
+      function handleDocumentKeydown(e) {
+        if (e.key === "Escape") {
+          closeMiniCalendar();
+          closePopup();
+          closeAllDayPops();
+        }
+      }
+
+      function closeAllDayPops() {
+        document.querySelectorAll(".day.mobile-open").forEach(el => {
+          el.classList.remove("mobile-open");
+        });
+      }
+
+      function safeLocalStorageGet(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch (error) {
+          console.warn("localStorage 讀取失敗：", error);
+          return null;
+        }
+      }
+
+      function safeLocalStorageSet(key, value) {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (error) {
+          console.warn("localStorage 寫入失敗：", error);
+          return false;
+        }
+      }
+
+      function loadBookings() {
+        const raw = safeLocalStorageGet(STORAGE_KEY);
+        if (!raw) {
+          safeLocalStorageSet(STORAGE_KEY, JSON.stringify(MOCK_BOOKINGS));
+          return [];
+        }
+
+        try {
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) return [];
+          return sortBookings(parsed.filter(isValidBookingShape));
+        } catch (error) {
+          console.warn("localStorage JSON 解析失敗：", error);
+          safeLocalStorageSet(STORAGE_KEY, JSON.stringify([]));
+          return [];
+        }
+      }
+
+      function saveBookings() {
+        safeLocalStorageSet(STORAGE_KEY, JSON.stringify(bookings));
+      }
+
+      function isValidBookingShape(item) {
+        return item &&
+          typeof item === "object" &&
+          typeof item.date === "string" &&
+          typeof item.username === "string" &&
+          typeof item.cpName === "string";
+      }
+
+      function sortBookings(list) {
+        return [...list].sort((a, b) => {
+          const aPriority = a.priority ? 1 : 0;
+          const bPriority = b.priority ? 1 : 0;
+          if (a.date !== b.date) return a.date.localeCompare(b.date);
+          if (aPriority !== bPriority) return aPriority - bPriority;
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        });
+      }
+
+      function normalizeIdInput(event) {
+        const value = String(event.target.value || "").trim();
+        event.target.value = value.startsWith("@") ? value.slice(1) : value;
+      }
+
+      function normalizeNumberString(value) {
+        return String(value || "").replace(/[０-９]/g, ch =>
+          String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
+        );
+      }
+
+      function startOfDay(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      }
+
+      function parseDateString(dateStr) {
+        if (!dateStr) return null;
+        const [y, m, d] = dateStr.split("-").map(Number);
+        if (!y || !m || !d) return null;
+        const date = new Date(y, m - 1, d);
+        if (
+          date.getFullYear() !== y ||
+          date.getMonth() !== m - 1 ||
+          date.getDate() !== d
+        ) return null;
+        return date;
+      }
+
+      function formatDateString(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+      }
+
+      function monthKeyFromDateStr(dateStr) {
+        return dateStr.slice(0, 7);
+      }
+
+      function isEndOfMonth(date) {
+        return date.getDate() === new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      }
+
+      function isDateBookable(date) {
+        const target = startOfDay(date);
+        if (target < today) return false;
+
+        const currentMonthKey = monthKeyFromDateStr(formatDateString(today));
+        const targetMonthKey = monthKeyFromDateStr(formatDateString(target));
+
+        if (targetMonthKey === currentMonthKey) return true;
+
+        if (isEndOfMonth(today)) {
+          const nextFirst = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+          return target.getTime() === nextFirst.getTime();
+        }
+
+        return false;
+      }
+
+      function applyDateInputLimits() {
+        els.bookingDate.min = formatDateString(today);
+      }
+
+      function containsUppercase(value) {
+        return /[A-Z]/.test(String(value || ""));
+      }
+
+      function normalizeAtId(value) {
+        let v = String(value || "").trim();
+        if (!v) return "";
+        if (v.startsWith("@")) v = v.slice(1);
+        return "@" + v;
+      }
+
+      function validateFlexibleId(value, type) {
+        if (!value) return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
+        if (containsUppercase(value)) return "ID請填寫小寫英文字母";
+        let v = String(value).trim();
+        if (v.startsWith("@")) v = v.slice(1);
+        if (!v || !ID_PATTERN.test(v)) {
+          return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
+        }
+        return "";
+      }
+
+      function validateLevel(levelRaw) {
+        const normalized = normalizeNumberString(levelRaw).replace(/[^\d]/g, "");
+        if (!normalized) return "請提交正確的帳號等級";
+        const level = Number(normalized);
+        if (!Number.isInteger(level)) return "請提交正確的帳號等級";
+        if (level < 50) return "此福利僅開放於50等以上之會員";
+        return "";
+      }
+
+      function getMonthlyLimit(level) {
+        return level >= 90 ? 2 : 1;
+      }
+
+      function getBookingsForDate(dateStr) {
+        return sortBookings(bookings.filter(item => item.date === dateStr));
+      }
+
+      function getRegularBookingsForDate(dateStr) {
+        return getBookingsForDate(dateStr).filter(item => !item.priority);
+      }
+
+      function getRemainingBaseSlots(dateStr) {
+        const used = getRegularBookingsForDate(dateStr).length;
+        return Math.max(0, BASE_SLOTS_PER_DAY - used);
+      }
+
+      function getBookedCountForBadge(dateStr) {
+        return getRegularBookingsForDate(dateStr).length;
+      }
+
+      function getUserMonthlyBookingsCount(username, monthKey) {
+        return bookings.filter(item =>
+          item.username === username && monthKeyFromDateStr(item.date) === monthKey
+        ).length;
+      }
+
+      function hasSameCpOnDate(dateStr, cpName) {
+        return bookings.some(item => item.date === dateStr && item.cpName === cpName);
+      }
+
+      function validateSubmission(data) {
+        const usernameError = validateFlexibleId(data.username, "user");
+        if (usernameError) return usernameError;
+
+        const cpError = validateFlexibleId(data.cpName, "cp");
+        if (cpError) return cpError;
+
+        const levelError = validateLevel(data.level);
+        if (levelError) return levelError;
+
+        if (!data.date) return "請選擇曝光日期";
+
+        const targetDate = parseDateString(data.date);
+        if (!targetDate || Number.isNaN(targetDate.getTime())) return "曝光日期格式錯誤";
+
+        if (!isDateBookable(targetDate)) {
+          return "此日期不在可預約範圍內";
+        }
+
+        const normalizedLevel = normalizeNumberString(data.level).replace(/[^\d]/g, "");
+        const level = Number(normalizedLevel);
+        const monthKey = monthKeyFromDateStr(data.date);
+        const count = getUserMonthlyBookingsCount(data.username, monthKey);
+        const limit = getMonthlyLimit(level);
+
+        if (count >= limit) {
+          return level >= 90 ? "Lv.90 以上：每 1 個月僅限申請 2 次" : "Lv.50～Lv.89：每 1 個月僅限申請 1 次";
+        }
+
+        if (hasSameCpOnDate(data.date, data.cpName)) {
+          return "相同日期中，相同主播ID僅限預約一次";
+        }
+
+        const remaining = getRemainingBaseSlots(data.date);
+        if (remaining <= 0 && level < 90) {
+          return "您選擇的日期名額已滿";
+        }
+
+        return "";
+      }
+
+      function showMessage(text, type = "success") {
+        els.messageBox.textContent = text;
+        els.messageBox.className = `message show ${type}`;
+      }
+
+      function clearMessage() {
+        els.messageBox.textContent = "";
+        els.messageBox.className = "message";
+      }
+
+      function showPopupError(text) {
+        els.popupErrorBox.textContent = text;
+        els.popupErrorBox.className = "popup-inline-message show error";
+      }
+
+      function clearPopupError() {
+        els.popupErrorBox.textContent = "";
+        els.popupErrorBox.className = "popup-inline-message";
+      }
+
+      function updatePopupSubmitState() {
+        const shouldEnable = popupScrolledToBottom;
+        els.popupSubmitBtn.disabled = !shouldEnable;
+
+        if (shouldEnable) {
+          els.popupSubmitBtn.classList.add("popup-submit-ready");
+        } else {
+          els.popupSubmitBtn.classList.remove("popup-submit-ready");
+        }
+      }
+
+      function handlePopupScroll() {
+        const el = els.popupScroll;
+        const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
+        if (reachedBottom) {
+          popupScrolledToBottom = true;
+          updatePopupSubmitState();
+        }
+      }
+
+      function startSubmitCooldown() {
+        const btn = els.submitBookingBtn;
+        btn.disabled = true;
+        btn.classList.add("submit-cooldown");
+
+        let remaining = SUBMIT_COOLDOWN_SECONDS;
+        btn.textContent = `送出預約（${remaining}s）`;
+
+        clearInterval(cooldownTimer);
+        cooldownTimer = setInterval(() => {
+          remaining -= 1;
+          if (remaining <= 0) {
+            clearInterval(cooldownTimer);
+            btn.disabled = false;
+            btn.classList.remove("submit-cooldown");
+            btn.textContent = "送出預約";
+            return;
+          }
+          btn.textContent = `送出預約（${remaining}s）`;
+        }, 1000);
+      }
+
+      function createJsonpRequest(params) {
+        return new Promise((resolve, reject) => {
+          const callbackName = `jsonpCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
+          const script = document.createElement("script");
+          const searchParams = new URLSearchParams({
+            ...params,
+            callback: callbackName
+          });
+
+          let timer = null;
+          let finished = false;
+
+          function cleanup() {
+            if (finished) return;
+            finished = true;
+
+            if (timer) clearTimeout(timer);
+            if (script.parentNode) script.parentNode.removeChild(script);
+
+            try {
+              delete window[callbackName];
+            } catch {
+              window[callbackName] = undefined;
+            }
+          }
+
+          window[callbackName] = function(result) {
+            cleanup();
+            resolve(result);
+          };
+
+          script.onerror = function() {
+            cleanup();
+            reject(new Error("無法連線至 Google Apps Script，請確認部署網址與存取權限"));
+          };
+
+          timer = setTimeout(() => {
+            cleanup();
+            reject(new Error("連線逾時，請稍後再試"));
+          }, JSONP_TIMEOUT);
+
+          script.src = `${APPS_SCRIPT_URL}?${searchParams.toString()}`;
+          document.body.appendChild(script);
+        });
+      }
+
+      async function sendBookingToGoogleSheet(bookingData) {
+        const result = await createJsonpRequest({
+          action: "write",
+          username: bookingData.username,
+          level: String(bookingData.level),
+          cpName: bookingData.cpName,
+          date: bookingData.date,
+          priority: String(bookingData.priority)
+        });
+
+        if (!result || result.success !== true) {
+          throw new Error(result && result.message ? result.message : "寫入失敗");
+        }
+
+        return result;
+      }
+
+      async function fetchBookingsFromGoogleSheet() {
+        const result = await createJsonpRequest({ action: "read" });
+
+        if (!result || result.success !== true || !Array.isArray(result.bookings)) {
+          throw new Error(result && result.message ? result.message : "讀取失敗");
+        }
+
+        return result.bookings;
+      }
+
+      async function syncBookingsFromGoogleSheet() {
+        try {
+          const sheetBookings = await fetchBookingsFromGoogleSheet();
+
+          bookings = sortBookings(
+            sheetBookings
+              .filter(item => item && typeof item === "object")
+              .map(item => ({
+                username: normalizeAtId(String(item.username || "").trim()),
+                level: Number(item.level || 0),
+                cpName: normalizeAtId(String(item.cpName || "").trim()),
+                date: String(item.date || "").trim(),
+                priority: String(item.priority).toLowerCase() === "true" || Boolean(item.priority),
+                createdAt: item.createdAt || new Date().toISOString()
+              }))
+              .filter(isValidBookingShape)
+          );
+
+          saveBookings();
+        } catch (error) {
+          console.error("讀取試算表資料失敗：", error);
+        }
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+        clearMessage();
+
+        if (els.submitBookingBtn.disabled) return;
+
+        const rawLevel = normalizeNumberString(String(els.levelInput.value || "")).replace(/[^\d]/g, "");
+        els.levelInput.value = rawLevel;
+
+        const rawData = {
+          username: String(els.username.value || "").trim(),
+          level: rawLevel,
+          cpName: String(els.cpName.value || "").trim(),
+          date: String(els.bookingDate.value || "").trim()
+        };
+
+        const validateData = {
+          username: normalizeAtId(rawData.username),
+          level: rawData.level,
+          cpName: normalizeAtId(rawData.cpName),
+          date: rawData.date
+        };
+
+        const error = validateSubmission(validateData);
+        if (error) {
+          showMessage(error, "error");
+          return;
+        }
+
+        const levelNum = Number(rawData.level);
+        pendingSubmission = {
+          username: normalizeAtId(rawData.username),
+          level: levelNum,
+          cpName: normalizeAtId(rawData.cpName),
+          date: rawData.date,
+          priority: levelNum >= 90 && getRemainingBaseSlots(rawData.date) <= 0
+        };
+
+        openPopup();
+      }
+
+      async function finalizeSubmission() {
+        if (!pendingSubmission) return;
+        if (els.popupSubmitBtn.disabled) return;
+
+        clearPopupError();
+        els.popupSubmitBtn.disabled = true;
+        els.popupSubmitBtn.textContent = "送出中...";
+
+        try {
+          const payload = {
+            username: pendingSubmission.username,
+            level: pendingSubmission.level,
+            cpName: pendingSubmission.cpName,
+            date: pendingSubmission.date,
+            priority: pendingSubmission.priority
+          };
+
+          const sheetResult = await sendBookingToGoogleSheet(payload);
+
+          if (!sheetResult || sheetResult.success !== true) {
+            throw new Error(sheetResult?.message || "寫入失敗");
+          }
+
+          bookings.push({
+            ...pendingSubmission,
+            createdAt: new Date().toISOString()
+          });
+
+          bookings = sortBookings(bookings);
+          saveBookings();
+
+          selectedDateStr = pendingSubmission.date;
+          const bookedDate = parseDateString(pendingSubmission.date);
+
+          if (bookedDate) {
+            viewYear = bookedDate.getFullYear();
+            viewMonth = bookedDate.getMonth();
+            miniYear = bookedDate.getFullYear();
+            miniMonth = bookedDate.getMonth();
+          }
+
+          closePopup();
+          startSubmitCooldown();
+          showMessage(
+            pendingSubmission.priority ? "預約成功，已列為優先預約" : "預約成功",
+            "success"
+          );
+          renderCalendar();
+          renderMiniCalendar();
+
+        } catch (error) {
+          console.error("寫入試算表失敗：", error);
+          showPopupError(`預約資料寫入失敗：${error.message}`);
+          els.popupSubmitBtn.textContent = "同意且送出";
+          updatePopupSubmitState();
+        }
+      }
+
+      function openPopup() {
+        lastFocusedElement = document.activeElement;
+        clearPopupError();
+        popupScrolledToBottom = false;
+        els.popupSubmitBtn.textContent = "同意且送出";
+        updatePopupSubmitState();
+
+        els.ruleOverlay.classList.add("show");
+        els.ruleOverlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        requestAnimationFrame(() => {
+          els.popupScroll.scrollTop = 0;
+
+          const noScrollNeeded = els.popupScroll.scrollHeight <= els.popupScroll.clientHeight + 8;
+          if (noScrollNeeded) {
+            popupScrolledToBottom = true;
+            updatePopupSubmitState();
+          }
+
+          els.popupCancelBtn.focus();
+        });
+      }
+
+      function closePopup() {
+        if (!els.ruleOverlay.classList.contains("show")) return;
+
+        els.ruleOverlay.classList.remove("show");
+        els.ruleOverlay.setAttribute("aria-hidden", "true");
+        els.popupSubmitBtn.textContent = "同意且送出";
+        clearPopupError();
+        popupScrolledToBottom = false;
+        updatePopupSubmitState();
+        pendingSubmission = null;
+        document.body.style.overflow = "";
+
+        if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+          lastFocusedElement.focus();
+        }
+      }
+
+      function changeMonth(delta) {
+        const next = new Date(viewYear, viewMonth + delta, 1);
+        viewYear = next.getFullYear();
+        viewMonth = next.getMonth();
+        renderCalendar();
+      }
+
+      function setSelectedDate(dateStr) {
+        const date = parseDateString(dateStr);
+        if (!date) return;
+
+        selectedDateStr = dateStr;
+        els.bookingDate.value = dateStr;
+        closeMiniCalendar();
+        clearMessage();
+        renderCalendar();
+        renderMiniCalendar();
+      }
+
+      function goToCalendarFromDateField() {
+        const baseDate = selectedDateStr
+          ? parseDateString(selectedDateStr)
+          : (els.bookingDate.value
+              ? parseDateString(els.bookingDate.value)
+              : new Date(viewYear, viewMonth, 1));
+
+        if (baseDate) {
+          viewYear = baseDate.getFullYear();
+          viewMonth = baseDate.getMonth();
+          renderCalendar();
+        }
+
+        requestAnimationFrame(() => {
+          if (els.calendarCard) {
+            els.calendarCard.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          }
+        });
+      }
+
+      function buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth) {
+        if (!dayBookings.length) return "";
+
+        const regularFull = getRemainingBaseSlots(dateStr) <= 0 && isCurrentMonth && selectable;
+        let lines = `
+          <div class="day-pop" role="dialog" aria-label="預約詳情">
+            <div class="day-pop-title">${escapeHtml(dateStr)}</div>
+            <div class="day-pop-divider"></div>
+        `;
+
+        dayBookings.forEach((b) => {
+          const cls = b.priority ? "signal-priority" : "signal-normal";
+          lines += `
+            <div class="day-pop-line">
+              <span class="signal-dot ${cls}"></span>
+              <span>${escapeHtml(b.cpName)}</span>
+            </div>
+          `;
+        });
+
+        if (regularFull) {
+          lines += `
+            <div class="day-pop-divider"></div>
+            <div class="day-pop-full">名額已滿 FULL</div>
+          `;
+        }
+
+        lines += `</div>`;
+        return lines;
+      }
+
+      function buildDayCell(date, isCurrentMonth, columnIndex) {
+        const dateStr = formatDateString(date);
+        const dayBookings = getBookingsForDate(dateStr);
+        const bookedForBadge = getBookedCountForBadge(dateStr);
+        const remaining = getRemainingBaseSlots(dateStr);
+        const selectable = isCurrentMonth && isDateBookable(date);
+        const isSelected = selectedDateStr === dateStr;
+        const regularFull = isCurrentMonth && selectable && remaining <= 0;
+        const hasInfo = dayBookings.length > 0;
+        const isPast = isCurrentMonth && startOfDay(date) < today;
+        const showEmptyText = isCurrentMonth && selectable && !isPast && !dayBookings.length;
+
+        const cls = [
+          "day",
+          `col-${columnIndex}`,
+          isCurrentMonth ? "" : "outside-month",
+          selectable ? "selectable" : "locked",
+          isSelected ? "selected" : "",
+          hasInfo ? "has-info" : "",
+          isPast ? "past" : ""
+        ].filter(Boolean).join(" ");
+
+        let topRight = "";
+        if (!isCurrentMonth) {
+          topRight = `<div class="day-top-right locked">即將開放</div>`;
+        } else if (isPast) {
+          topRight = `<div class="day-top-right locked">不開放預約</div>`;
+        } else if (!selectable) {
+          topRight = `<div class="day-top-right locked">即將開放</div>`;
+        } else {
+          topRight = `<div class="day-top-right">${bookedForBadge}/3</div>`;
+        }
+
+        let bookingHtml = "";
+        if (dayBookings.length) {
+          bookingHtml = dayBookings.map(item => {
+            const cls = item.priority ? "signal-priority" : "signal-normal";
+            return `
+              <span class="booking-text" title="${escapeHtml(item.cpName)}">
+                <span class="signal-dot ${cls}"></span>
+                <span>${escapeHtml(item.cpName)}</span>
+              </span>
+            `;
+          }).join("");
+        } else if (showEmptyText) {
+          bookingHtml = `<div class="empty-note">開放預約中</div>`;
+        }
+
+        const fullRibbon = regularFull ? `<div class="full-ribbon">FULL</div>` : "";
+        const popHtml = buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth);
+
+        return `
+          <div
+            class="${cls}"
+            data-date="${dateStr}"
+            ${selectable ? 'tabindex="0" role="button" aria-label="選擇日期 ' + escapeHtml(dateStr) + '"' : ""}
+          >
+            ${fullRibbon}
+            <div class="day-header">
+              <div class="day-num">${date.getDate()}</div>
+              ${topRight}
+            </div>
+            <div class="day-bookings">
+              ${bookingHtml}
+            </div>
+            ${popHtml}
+          </div>
+        `;
+      }
+
+      function renderCalendar() {
+        const firstDay = new Date(viewYear, viewMonth, 1);
+        const startWeekday = firstDay.getDay();
+        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+        els.monthTitle.textContent = `${viewYear}年 ${viewMonth + 1}月`;
+
+        let html = WEEKDAYS.map(d => `<div class="weekday">${d}</div>`).join("");
+
+        for (let i = 0; i < startWeekday; i++) {
+          const date = new Date(viewYear, viewMonth, i - startWeekday + 1);
+          html += buildDayCell(date, false, i % 7);
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(viewYear, viewMonth, d);
+          const cellIndex = startWeekday + (d - 1);
+          html += buildDayCell(date, true, cellIndex % 7);
+        }
+
+        const totalCells = startWeekday + daysInMonth;
+        const remain = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+
+        for (let i = 1; i <= remain; i++) {
+          const date = new Date(viewYear, viewMonth + 1, i);
+          const cellIndex = startWeekday + daysInMonth + (i - 1);
+          html += buildDayCell(date, false, cellIndex % 7);
+        }
+
+        els.calendarGrid.innerHTML = html;
+
+        els.calendarGrid.querySelectorAll(".day.selectable").forEach(el => {
+          el.addEventListener("click", () => setSelectedDate(el.dataset.date));
+          el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSelectedDate(el.dataset.date);
+            }
+          });
+        });
+      }
+
+      function toggleMiniCalendar() {
+        const willShow = !els.miniCalendarPop.classList.contains("show");
+        els.miniCalendarPop.classList.toggle("show", willShow);
+        els.miniCalendarPop.setAttribute("aria-hidden", String(!willShow));
+      }
+
+      function closeMiniCalendar() {
+        els.miniCalendarPop.classList.remove("show");
+        els.miniCalendarPop.setAttribute("aria-hidden", "true");
+      }
+
+      function renderMiniCalendar() {
+        const firstDay = new Date(miniYear, miniMonth, 1);
+        const startWeekday = firstDay.getDay();
+        const daysInMonth = new Date(miniYear, miniMonth + 1, 0).getDate();
+
+        els.miniTitle.textContent = `${miniYear}年 ${miniMonth + 1}月`;
+
+        let html = WEEKDAYS.map(d => `<div class="mini-weekday">${d}</div>`).join("");
+
+        for (let i = 0; i < startWeekday; i++) {
+          html += `<div></div>`;
+        }
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const date = new Date(miniYear, miniMonth, d);
+          const dateStr = formatDateString(date);
+          const disabled = !isDateBookable(date);
+          const isSelected = selectedDateStr === dateStr;
+          const isToday = dateStr === formatDateString(today);
+
+          html += `
+            <button
+              type="button"
+              class="mini-day ${disabled ? "disabled" : ""} ${isSelected ? "selected" : ""} ${isToday ? "today" : ""}"
+              data-date="${dateStr}"
+              ${disabled ? "disabled" : ""}
+              aria-label="${dateStr}"
+            >${d}</button>
+          `;
+        }
+
+        els.miniCalendarGrid.innerHTML = html;
+
+        els.miniCalendarGrid.querySelectorAll(".mini-day:not(.disabled)").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const dateStr = btn.dataset.date;
+            const d = parseDateString(dateStr);
+            if (!d) return;
+            viewYear = d.getFullYear();
+            viewMonth = d.getMonth();
+            setSelectedDate(dateStr);
+          });
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    })();
+  </script>
 </body>
 </html>
