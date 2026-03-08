@@ -247,7 +247,8 @@
     }
 
     .calendar-card:hover .calendar-shell,
-    .calendar-card:focus-within .calendar-shell {
+    .calendar-card:focus-within .calendar-shell,
+    .calendar-card.force-expanded .calendar-shell {
       max-height: var(--calendar-expanded);
     }
 
@@ -648,6 +649,9 @@
 
     input[type="date"] {
       color-scheme: dark;
+      appearance: none;
+      -webkit-appearance: none;
+      line-height: 1.2;
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
@@ -677,11 +681,21 @@
       padding-right: 48px;
     }
 
+    .field.date-field {
+      position: relative;
+    }
+
     .date-row {
       display: grid;
-      grid-template-columns: 1fr 56px;
+      grid-template-columns: minmax(0, 1fr) 56px;
       gap: 10px;
       align-items: center;
+      min-height: 52px;
+      width: 100%;
+    }
+
+    .date-row input[type="date"] {
+      height: 52px;
       min-height: 52px;
     }
 
@@ -699,6 +713,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
 
     .form-actions {
@@ -1023,18 +1038,6 @@
       filter: none !important;
     }
 
-    .sr-only {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0,0,0,0) !important;
-      border: 0 !important;
-      white-space: nowrap !important;
-    }
-
     @media (max-width: 980px) {
       .bottom-layout { grid-template-columns: 1fr; }
 
@@ -1078,7 +1081,8 @@
       }
 
       .calendar-card:hover .calendar-shell,
-      .calendar-card:focus-within .calendar-shell {
+      .calendar-card:focus-within .calendar-shell,
+      .calendar-card.force-expanded .calendar-shell {
         max-height: none;
       }
 
@@ -1142,6 +1146,29 @@
 
       .desktop-row {
         grid-template-columns: 1fr;
+      }
+
+      .field.date-field {
+        width: 90%;
+      }
+
+      .date-row {
+        grid-template-columns: minmax(0, 1fr) 52px;
+        gap: 8px;
+        min-height: 52px;
+      }
+
+      .date-row input[type="date"] {
+        height: 52px;
+        min-height: 52px;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      .calendar-trigger {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
       }
 
       .form-actions {
@@ -1224,7 +1251,7 @@
     </section>
 
     <section class="bottom-layout">
-      <div class="ui-card">
+      <div class="ui-card" id="bookingInfoCard">
         <div class="section">
           <h2 class="section-title">預約資訊</h2>
 
@@ -1251,7 +1278,7 @@
                 <datalist id="levelList"></datalist>
               </div>
 
-              <div class="field" style="position:relative;" id="dateFieldWrap">
+              <div class="field date-field" id="dateFieldWrap">
                 <label for="bookingDate">曝光日期</label>
                 <div class="date-row">
                   <input id="bookingDate" name="bookingDate" type="date" />
@@ -1380,7 +1407,7 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
     (() => {
       "use strict";
 
-      const STORAGE_KEY = "god_sponsorship_bookings_v20";
+      const STORAGE_KEY = "god_sponsorship_bookings_v21";
       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjw9C-JYBpfvwT8wPTYaNO7BD1tYx-PRXyRW2tD-cCgmhj4ZEsteZMCrotdtNPt7t_/exec";
       const BASE_SLOTS_PER_DAY = 3;
       const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -1402,7 +1429,6 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         cpName: document.getElementById("cpName"),
         bookingDate: document.getElementById("bookingDate"),
         messageBox: document.getElementById("messageBox"),
-        resetBtn: document.getElementById("resetBtn"),
         submitBookingBtn: document.getElementById("submitBookingBtn"),
         calendarShell: document.getElementById("calendarShell"),
         modeText: document.getElementById("modeText"),
@@ -1419,7 +1445,8 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         popupScroll: document.getElementById("popupScroll"),
         popupErrorBox: document.getElementById("popupErrorBox"),
         dateFieldWrap: document.getElementById("dateFieldWrap"),
-        calendarCard: document.getElementById("calendarCard")
+        calendarCard: document.getElementById("calendarCard"),
+        bookingInfoCard: document.getElementById("bookingInfoCard")
       };
 
       const today = startOfDay(new Date());
@@ -1495,6 +1522,32 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
           }, 0);
         });
 
+        if (els.bookingInfoCard && els.calendarCard) {
+          els.bookingInfoCard.addEventListener("mouseenter", () => {
+            els.calendarCard.classList.add("force-expanded");
+            els.modeText.textContent = "全月存取模式";
+          });
+
+          els.bookingInfoCard.addEventListener("mouseleave", () => {
+            els.calendarCard.classList.remove("force-expanded");
+            els.modeText.textContent = "兩週預覽模式";
+          });
+
+          els.bookingInfoCard.addEventListener("focusin", () => {
+            els.calendarCard.classList.add("force-expanded");
+            els.modeText.textContent = "全月存取模式";
+          });
+
+          els.bookingInfoCard.addEventListener("focusout", () => {
+            setTimeout(() => {
+              if (!els.bookingInfoCard.contains(document.activeElement)) {
+                els.calendarCard.classList.remove("force-expanded");
+                els.modeText.textContent = "兩週預覽模式";
+              }
+            }, 0);
+          });
+        }
+
         els.miniCalendarBtn.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -1548,7 +1601,6 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
 
         els.bookingDate.addEventListener("focus", () => {
           closeMiniCalendar();
-          goToCalendarFromDateField();
         });
       }
 
@@ -2139,26 +2191,9 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         renderMiniCalendar();
       }
 
-      function goToCalendarFromDateField() {
-        const baseDate = selectedDateStr
-          ? parseDateString(selectedDateStr)
-          : (els.bookingDate.value
-              ? parseDateString(els.bookingDate.value)
-              : new Date(viewYear, viewMonth, 1));
-
-        if (baseDate) {
-          viewYear = baseDate.getFullYear();
-          viewMonth = baseDate.getMonth();
-          renderCalendar();
-        }
-
-        requestAnimationFrame(() => {
-          if (els.calendarCard) {
-            els.calendarCard.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-          }
+      function closeAllDayPops() {
+        document.querySelectorAll(".day.mobile-open").forEach(el => {
+          el.classList.remove("mobile-open");
         });
       }
 
