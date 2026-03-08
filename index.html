@@ -296,8 +296,46 @@
     }
 
     .day.past {
-      background: rgba(6,7,10,.94);
-    }
+  background: rgba(6,7,10,.78);
+  filter: saturate(.72) brightness(.82);
+}
+
+.day.past .day-num,
+.day.past .booking-text,
+.day.past .empty-note,
+.day.past .day-top-right.locked {
+  opacity: .72;
+}
+
+.day.past .day-num,
+.day.past .booking-text,
+.day.past .empty-note {
+  opacity: .72;
+}
+
+.day.past .day-top-right.locked {
+  opacity: .72;
+}
+
+.day.past::before {
+  content: "已完成";
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 8px);
+  transform: translate(-50%, -50%) rotate(-14deg);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 1000;
+  letter-spacing: .18em;
+  color: #ffffff;
+  background: #4b5563;
+  border: 1px solid #6b7280;
+  box-shadow: 0 6px 14px rgba(0,0,0,.22);
+  pointer-events: none;
+  z-index: 5;
+  opacity: .85;
+}
 
     .day.outside-month {
       background: rgba(4,5,8,.96);
@@ -2067,8 +2105,7 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
       function buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth) {
         if (!dayBookings.length) return "";
 
-        const regularFull = getRemainingBaseSlots(dateStr) <= 0 && isCurrentMonth && selectable;
-        let lines = `
+      const regularFull = getRemainingBaseSlots(dateStr) <= 0 && isCurrentMonth;        let lines = `
           <div class="day-pop">
             <div class="day-pop-title">${escapeHtml(dateStr)}</div>
             <div class="day-pop-divider"></div>
