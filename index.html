@@ -217,19 +217,17 @@
     }
 
     .icon-btn {
-      width: 51px;
-      height: 51px;
+      width: 43px;
+      height: 43px;
       border-radius: 16px;
-      font-size: 28px;
-      color: #18040f;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)),
-        linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
+      font-size: 20px;
+      color: #ffffff;
+      background: rgba(255,255,255,.06);
       box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.18),
-        inset 0 -4px 0 rgba(0,0,0,.18),
-        0 10px 24px rgba(255,46,166,.18);
-      border: 1px solid rgba(255,46,166,.22);
+        inset 0 2px 0 rgba(255,255,255,.08),
+        inset 0 -4px 0 rgba(0,0,0,.24),
+        0 10px 24px rgba(0,0,0,.24);
+      border: 1px solid rgba(255,255,255,.12);
       text-shadow: none;
     }
 
@@ -351,9 +349,9 @@
       text-shadow: 0 0 12px rgba(25,223,208,.2);
     }
 
-    .day-top-right {
-      min-width: 40px;
-      height: 22px;
+    .day-top-right {      
+      min-width: 32px;
+      height: 17px;
       padding: 0 8px;
       border-radius: 999px;
       display: inline-flex;
@@ -361,10 +359,12 @@
       justify-content: center;
       font-size: 11px;
       font-weight: 1000;
-      color: #ffffff;
-      background: linear-gradient(180deg, #a01263, #7c0b4c);
-      box-shadow: 0 8px 16px rgba(0,0,0,.24);
-      border: 1px solid rgba(0,0,0,.28);
+      color: #071616;
+      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
+      box-shadow:
+        0 0 0.6px rgba(25,223,208,.01),
+        0 8px 16px rgba(25,223,208,.12);
+      border: 1px solid rgba(25,223,208,.22);
     }
 
     .day-top-right.locked {
