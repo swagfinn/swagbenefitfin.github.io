@@ -13,7 +13,6 @@
       --muted: rgba(255,255,255,.64);
       --line: rgba(255,255,255,.08);
 
-      /* SWAG 色 */
       --brand: #19dfd0;
       --brand-strong: #09cfc0;
       --brand-glow:
@@ -21,7 +20,6 @@
         0 0 14px rgba(25,223,208,.28),
         0 0 24px rgba(9,207,192,.18);
 
-      /* 1k+ 色 */
       --accent-pink: #ff2ea6;
       --accent-pink-strong: #ff0f96;
       --accent-pink-glow:
@@ -102,7 +100,6 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
     }
 
-    /* ===== 第一區塊：只保留模糊渲染框，月曆放進來 ===== */
     .hero-shell {
       margin-bottom: 22px;
       padding: 18px;
@@ -126,7 +123,6 @@
       opacity: .95;
     }
 
-    /* ===== CALENDAR ===== */
     .calendar-card {
       z-index: 5;
       background:
@@ -221,20 +217,20 @@
     }
 
     .icon-btn {
-      width: 56px;
-      height: 56px;
+      width: 51px;
+      height: 51px;
       border-radius: 16px;
       font-size: 28px;
-      color: var(--accent-pink);
-      text-shadow: var(--accent-pink-glow);
+      color: #18040f;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
-        linear-gradient(180deg, #232635, #121420);
+        linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05)),
+        linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
       box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.08),
-        inset 0 -4px 0 rgba(0,0,0,.24),
-        0 10px 24px rgba(0,0,0,.24);
+        inset 0 2px 0 rgba(255,255,255,.18),
+        inset 0 -4px 0 rgba(0,0,0,.18),
+        0 10px 24px rgba(255,46,166,.18);
       border: 1px solid rgba(255,46,166,.22);
+      text-shadow: none;
     }
 
     .calendar-shell {
@@ -243,7 +239,9 @@
       transition: max-height .28s ease;
     }
 
-    .calendar-card.manual-full .calendar-shell {
+    .calendar-card.manual-full .calendar-shell,
+    .calendar-card:hover .calendar-shell,
+    .calendar-card:focus-within .calendar-shell {
       max-height: var(--calendar-expanded);
     }
 
@@ -364,9 +362,9 @@
       font-size: 11px;
       font-weight: 1000;
       color: #ffffff;
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      box-shadow: 0 8px 16px rgba(255,46,166,.18);
-      border: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, #a01263, #7c0b4c);
+      box-shadow: 0 8px 16px rgba(0,0,0,.24);
+      border: 1px solid rgba(0,0,0,.28);
     }
 
     .day-top-right.locked {
@@ -445,7 +443,7 @@
       font-size: 14px;
       font-weight: 1000;
       letter-spacing: .18em;
-      border: 3px solid var(--accent-pink);
+      border: 2.94px solid var(--accent-pink);
       box-shadow:
         0 10px 20px rgba(255,46,166,.12),
         inset 0 1px 0 rgba(255,255,255,.1),
@@ -572,7 +570,6 @@
     .legend-priority { color: var(--accent-coral); background: var(--accent-coral); }
     .legend-locked { color: #8891a2; background: #8891a2; }
 
-    /* ===== BOTTOM ===== */
     .bottom-layout {
       display: grid;
       grid-template-columns: 1.06fr .94fr;
@@ -594,12 +591,12 @@
 
     .section-title.brand-title {
       color: var(--brand);
-      text-shadow: var(--brand-glow);
+      text-shadow: none;
     }
 
     .section-title.pink-title {
       color: var(--accent-pink);
-      text-shadow: var(--accent-pink-glow);
+      text-shadow: none;
     }
 
     .message {
@@ -716,14 +713,14 @@
       border: none;
       border-radius: 16px;
       cursor: pointer;
-      color: #ffffff;
+      color: #071616;
       font-size: 22px;
       font-weight: 900;
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
+      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.22),
         inset 0 -3px 0 rgba(0,0,0,.18),
-        0 10px 18px rgba(255,46,166,.18);
+        0 10px 18px rgba(25,223,208,.18);
     }
 
     .form-actions {
@@ -843,7 +840,7 @@
       border-radius: 12px;
       cursor: pointer;
       background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      color: #ffffff;
+      color: #fff;
       font-size: 18px;
       font-weight: 1000;
     }
@@ -1084,7 +1081,9 @@
         overflow: auto;
       }
 
-      .calendar-card.manual-full .calendar-shell {
+      .calendar-card.manual-full .calendar-shell,
+      .calendar-card:hover .calendar-shell,
+      .calendar-card:focus-within .calendar-shell {
         max-height: 1000px;
       }
 
@@ -1460,6 +1459,18 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             toggleCalendarMode();
+          }
+        });
+
+        els.calendarCard.addEventListener("mouseenter", () => {
+          if (!isFullBrowseMode) {
+            els.calendarCard.classList.add("manual-full");
+          }
+        });
+
+        els.calendarCard.addEventListener("mouseleave", () => {
+          if (!isFullBrowseMode) {
+            els.calendarCard.classList.remove("manual-full");
           }
         });
 
