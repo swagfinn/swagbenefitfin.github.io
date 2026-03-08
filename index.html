@@ -1148,27 +1148,48 @@
         grid-template-columns: 1fr;
       }
 
+      .field {
+        width: 100%;
+      }
+
       .field.date-field {
-        width: 90%;
+        width: 85%;
+        max-width: 85%;
+        justify-self: start;
+      }
+
+      .input-wrap,
+      .date-row,
+      .date-row input[type="date"] {
+        height: 52px;
+        min-height: 52px;
       }
 
       .date-row {
         grid-template-columns: minmax(0, 1fr) 52px;
         gap: 8px;
-        min-height: 52px;
       }
 
       .date-row input[type="date"] {
-        height: 52px;
-        min-height: 52px;
-        padding-top: 0;
-        padding-bottom: 0;
+        padding-top: 13px;
+        padding-bottom: 13px;
       }
 
       .calendar-trigger {
         width: 52px;
         height: 52px;
         border-radius: 16px;
+      }
+
+      .icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        font-size: 21px;
+      }
+
+      .month-controls {
+        gap: 8px;
       }
 
       .form-actions {
@@ -1407,7 +1428,7 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
     (() => {
       "use strict";
 
-      const STORAGE_KEY = "god_sponsorship_bookings_v21";
+      const STORAGE_KEY = "god_sponsorship_bookings_v22";
       const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjw9C-JYBpfvwT8wPTYaNO7BD1tYx-PRXyRW2tD-cCgmhj4ZEsteZMCrotdtNPt7t_/exec";
       const BASE_SLOTS_PER_DAY = 3;
       const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
@@ -1467,11 +1488,16 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         populateLevelList();
         applyDateInputLimits();
         bindEvents();
+        updateCalendarModeByViewport();
         renderCalendar();
         renderMiniCalendar();
         await syncBookingsFromGoogleSheet();
         renderCalendar();
         renderMiniCalendar();
+      }
+
+      function isMobileViewport() {
+        return window.innerWidth <= MOBILE_BREAKPOINT;
       }
 
       function populateLevelList() {
@@ -1510,37 +1536,48 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
         els.bookingForm.addEventListener("submit", handleSubmit);
 
-        const setPreviewMode = () => { els.modeText.textContent = "兩週預覽模式"; };
-        const setFullMode = () => { els.modeText.textContent = "全月存取模式"; };
+        const setPreviewMode = () => {
+          if (isMobileViewport()) return;
+          els.modeText.textContent = "兩週預覽模式";
+        };
+
+        const setFullMode = () => {
+          els.modeText.textContent = "全月存取模式";
+        };
 
         els.calendarShell.addEventListener("mouseenter", setFullMode);
         els.calendarShell.addEventListener("mouseleave", setPreviewMode);
         els.calendarShell.addEventListener("focusin", setFullMode);
         els.calendarShell.addEventListener("focusout", () => {
           setTimeout(() => {
-            if (!els.calendarShell.contains(document.activeElement)) setPreviewMode();
+            if (!els.calendarShell.contains(document.activeElement)) {
+              updateCalendarModeByViewport();
+            }
           }, 0);
         });
 
         if (els.bookingInfoCard && els.calendarCard) {
           els.bookingInfoCard.addEventListener("mouseenter", () => {
+            if (isMobileViewport()) return;
             els.calendarCard.classList.add("force-expanded");
             els.modeText.textContent = "全月存取模式";
           });
 
           els.bookingInfoCard.addEventListener("mouseleave", () => {
+            if (isMobileViewport()) return;
             els.calendarCard.classList.remove("force-expanded");
             els.modeText.textContent = "兩週預覽模式";
           });
 
           els.bookingInfoCard.addEventListener("focusin", () => {
+            if (isMobileViewport()) return;
             els.calendarCard.classList.add("force-expanded");
             els.modeText.textContent = "全月存取模式";
           });
 
           els.bookingInfoCard.addEventListener("focusout", () => {
             setTimeout(() => {
-              if (!els.bookingInfoCard.contains(document.activeElement)) {
+              if (!els.bookingInfoCard.contains(document.activeElement) && !isMobileViewport()) {
                 els.calendarCard.classList.remove("force-expanded");
                 els.modeText.textContent = "兩週預覽模式";
               }
@@ -1597,11 +1634,22 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         window.addEventListener("resize", () => {
           closeMiniCalendar();
           closeAllDayPops();
+          updateCalendarModeByViewport();
         });
 
         els.bookingDate.addEventListener("focus", () => {
           closeMiniCalendar();
         });
+      }
+
+      function updateCalendarModeByViewport() {
+        if (isMobileViewport()) {
+          els.calendarCard.classList.add("force-expanded");
+          els.modeText.textContent = "全月存取模式";
+        } else {
+          els.calendarCard.classList.remove("force-expanded");
+          els.modeText.textContent = "兩週預覽模式";
+        }
       }
 
       function handleDocumentClick(e) {
@@ -1615,7 +1663,7 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
           closeMiniCalendar();
         }
 
-        if (window.innerWidth <= MOBILE_BREAKPOINT) {
+        if (isMobileViewport()) {
           const clickedDay = target.closest(".day.has-info");
           const clickedInsidePop = target.closest(".day-pop");
 
@@ -2189,12 +2237,6 @@ Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 �
         clearMessage();
         renderCalendar();
         renderMiniCalendar();
-      }
-
-      function closeAllDayPops() {
-        document.querySelectorAll(".day.mobile-open").forEach(el => {
-          el.classList.remove("mobile-open");
-        });
       }
 
       function buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth) {
