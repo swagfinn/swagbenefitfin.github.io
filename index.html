@@ -1151,6 +1151,7 @@
         font-size: 12px;
         padding: 8px 16px;
       }
+      @media (max-width: 760px) {
       .day-pop {
         position: fixed;
         left: 50% !important;
@@ -1166,6 +1167,14 @@
         padding: 14px;
         box-sizing: border-box;
       }
+      .day.has-info:hover .day-pop,
+      .day.has-info:focus-within .day-pop,
+      .day.has-info:active .day-pop {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1) !important;
+      }
+    }
       
       .day.has-info:hover .day-pop,
       .day.has-info:focus-within .day-pop,
