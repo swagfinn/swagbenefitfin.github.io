@@ -1,2310 +1,1278 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>大神贊助預約系統</title>
-  <style>
-    :root {
-      --bg: #06070b;
-      --panel: rgba(9, 10, 16, 0.88);
-      --panel-2: rgba(12, 13, 21, 0.94);
-      --text: #ffffff;
-      --muted: rgba(255,255,255,.64);
-      --line: rgba(255,255,255,.08);
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工作小工具介紹</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      --brand: #19dfd0;
-      --brand-strong: #09cfc0;
-      --brand-glow:
-        0 0 6px rgba(25,223,208,.34),
-        0 0 14px rgba(25,223,208,.28),
-        0 0 24px rgba(9,207,192,.18);
-
-      --accent-pink: #ff2ea6;
-      --accent-pink-strong: #ff0f96;
-      --accent-pink-glow:
-        0 0 6px rgba(255,46,166,.34),
-        0 0 14px rgba(255,46,166,.28),
-        0 0 24px rgba(255,46,166,.18);
-
-      --accent-coral: #ff6f89;
-      --success: #65f39d;
-      --danger: #ff618c;
-
-      --radius-xl: 30px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --shadow-1: 0 28px 70px rgba(0,0,0,.52);
-      --shadow-2: 0 18px 40px rgba(0,0,0,.32);
-
-      --day-min-height: 190px;
-      --calendar-collapsed: 560px;
-      --calendar-expanded: 1400px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      color: var(--text);
-      font-family: "Inter", "Segoe UI", "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background:
-        radial-gradient(circle at 14% 0%, rgba(255, 45, 166, .18), transparent 28%),
-        radial-gradient(circle at 78% 0%, rgba(111, 43, 255, .28), transparent 30%),
-        radial-gradient(circle at 60% 18%, rgba(25, 223, 208, .06), transparent 22%),
-        linear-gradient(180deg, #1a0620 0%, #0d0f17 18%, #07080d 42%, #05060a 100%);
-      background-attachment: fixed;
-    }
-
-    body {
-      padding: 22px;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.02), transparent 16%),
-        radial-gradient(circle at 50% -12%, rgba(255, 0, 132, .22), transparent 34%);
-      mix-blend-mode: screen;
-      opacity: .82;
-    }
-
-    .wrap {
-      max-width: 1320px;
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .ui-card {
-      position: relative;
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-1);
-      overflow: hidden;
-      backdrop-filter: blur(14px);
-    }
-
-    .ui-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      pointer-events: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
-
-    .hero-shell {
-      margin-bottom: 22px;
-      padding: 18px;
-      background:
-        radial-gradient(circle at 20% 0%, rgba(255, 46, 166, .16), transparent 28%),
-        radial-gradient(circle at 84% 0%, rgba(111, 43, 255, .22), transparent 32%),
-        linear-gradient(180deg, rgba(24, 8, 24, .94) 0%, rgba(9, 11, 16, .98) 70%);
-      border-color: rgba(255,255,255,.09);
-      overflow: visible;
-    }
-
-    .hero-shell::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 16% 0%, rgba(255,46,166,.12), transparent 26%),
-        radial-gradient(circle at 85% 0%, rgba(25,223,208,.08), transparent 24%);
-      pointer-events: none;
-      filter: blur(18px);
-      opacity: .95;
-    }
-
-    .calendar-card {
-      z-index: 5;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
-        rgba(7,8,12,.92);
-      margin: 0;
-    }
-
-    .calendar-topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      padding: 22px 24px;
-      border-bottom: 1px solid rgba(255,255,255,.07);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        radial-gradient(circle at 12% 0%, rgba(255,46,166,.1), transparent 18%);
-    }
-
-    .calendar-title-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .calendar-title {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 1000;
-      letter-spacing: -.03em;
-      color: var(--brand);
-      text-shadow: var(--brand-glow);
-    }
-
-    .mode-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 8px 14px;
-      border-radius: 999px;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: .08em;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      text-transform: uppercase;
-      cursor: pointer;
-      user-select: none;
-      transition: transform .16s ease, filter .16s ease;
-    }
-
-    .mode-badge:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
-    }
-
-    .mode-badge .dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 999px;
-      background: var(--brand);
-      box-shadow: 0 0 12px rgba(25,223,208,.6);
-    }
-
-    .month-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .btn {
-      appearance: none;
-      border: none;
-      cursor: pointer;
-      color: #fff;
-      font-weight: 900;
-      letter-spacing: .02em;
-      transition: transform .16s ease, filter .16s ease, opacity .16s ease;
-    }
-
-    .btn:hover:not(:disabled) {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
-    }
-
-    .btn:disabled {
-      opacity: .42;
-      cursor: not-allowed;
-    }
-
-    .icon-btn {
-      width: 43px;
-      height: 43px;
-      border-radius: 16px;
-      font-size: 20px;
-      color: #ffffff;
-      background: rgba(255,255,255,.06);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.08),
-        inset 0 -4px 0 rgba(0,0,0,.24),
-        0 10px 24px rgba(0,0,0,.24);
-      border: 1px solid rgba(255,255,255,.12);
-      text-shadow: none;
-    }
-
-    .calendar-shell {
-      max-height: var(--calendar-collapsed);
-      overflow: hidden;
-      transition: max-height .28s ease;
-    }
-
-    .calendar-card.manual-full .calendar-shell,
-    .calendar-card:hover .calendar-shell,
-    .calendar-card:focus-within .calendar-shell {
-      max-height: var(--calendar-expanded);
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 0;
-      border-top: 1px solid var(--line);
-      border-left: 1px solid var(--line);
-      position: relative;
-      z-index: 2;
-      background: rgba(6,7,11,.78);
-    }
-
-    .weekday {
-      text-align: center;
-      padding: 14px 6px;
-      font-size: 15px;
-      font-weight: 1000;
-      letter-spacing: .12em;
-      color: rgba(255,255,255,.88);
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        rgba(13,14,20,.96);
-      white-space: nowrap;
-      text-transform: uppercase;
-    }
-
-    .day {
-      min-height: var(--day-min-height);
-      padding: 14px 16px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.012), rgba(255,255,255,.004)),
-        rgba(9,10,15,.98);
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      overflow: visible;
-      isolation: isolate;
-      transition: background .16s ease, transform .16s ease;
-    }
-
-    .day::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,.02), transparent 36%);
-      opacity: .65;
-    }
-
-    .day.past {
-  background: rgba(6,7,10,.78);
-  filter: saturate(.72) brightness(.82);
+:root {
+  --bg: #F0EDE8;
+  --ink: #1A1714;
+  --mid: #6B6460;
+  --pale: #E3DED7;
+  --card: #FAFAF8;
+  --tasks-h: #1A6FFF;
+  --tasks-l: #E8F0FF;
+  --chrome-h: #E8560A;
+  --chrome-l: #FFF0E8;
+  --tab-h: #0B7C4F;
+  --tab-l: #E6F7F0;
+  --cmd-h: #7B35C2;
+  --cmd-l: #F2EAFF;
+  --border: #D8D2CA;
+  --step-size: 26px;
 }
 
-.day.past .day-num,
-.day.past .booking-text,
-.day.past .empty-note,
-.day.past .day-top-right.locked {
-  opacity: .72;
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
 }
 
-.day.past .day-num,
-.day.past .booking-text,
-.day.past .empty-note {
-  opacity: .72;
+/* ── LAYOUT ── */
+.app {
+  display: flex;
+  height: 100vh;
 }
 
-.day.past .day-top-right.locked {
-  opacity: .72;
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.day.past::before {
-  content: "已完成";
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 8px);
-  transform: translate(-50%, -50%) rotate(-14deg);
-  padding: 8px 18px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 1000;
+.sidebar-brand {
+  padding: 0 24px 28px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  margin-bottom: 16px;
+}
+.sidebar-brand .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
   letter-spacing: .18em;
-  color: #ffffff;
-  background: #4b5563;
-  border: 1px solid #6b7280;
-  box-shadow: 0 6px 14px rgba(0,0,0,.22);
-  pointer-events: none;
-  z-index: 5;
-  opacity: .85;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  margin-bottom: 6px;
+}
+.sidebar-brand h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+}
+.sidebar-brand .sub {
+  font-size: 11px;
+  color: rgba(255,255,255,.35);
+  margin-top: 4px;
 }
 
-    .day.outside-month {
-      background: rgba(4,5,8,.96);
-      opacity: .38;
-      pointer-events: none;
-    }
-
-    .day.selectable { cursor: pointer; }
-
-    .day.selected {
-      outline: 2px solid rgba(25,223,208,.72);
-      outline-offset: -2px;
-      background:
-        linear-gradient(180deg, rgba(25,223,208,.07), rgba(255,255,255,.02)),
-        rgba(10,14,18,.96);
-      box-shadow: inset 0 0 0 1px rgba(25,223,208,.12);
-    }
-
-    .day:hover,
-    .day:focus-within {
-      z-index: 80;
-    }
-
-    .day.selectable:hover {
-      background:
-        linear-gradient(180deg, rgba(255,46,166,.04), rgba(255,255,255,.02)),
-        rgba(12,14,21,.98);
-    }
-
-    .day-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .day-num {
-      font-size: 32px;
-      font-weight: 1000;
-      line-height: 1;
-      letter-spacing: -.04em;
-      color: rgba(255,255,255,.48);
-    }
-
-    .day.selected .day-num {
-      color: var(--brand);
-      text-shadow: 0 0 12px rgba(25,223,208,.2);
-    }
-
-    .day-top-right {      
-      min-width: 32px;
-      height: 17px;
-      padding: 0 8px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 1000;
-      color: #071616;
-      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
-      box-shadow:
-        0 0 0.6px rgba(25,223,208,.01),
-        0 8px 16px rgba(25,223,208,.12);
-      border: 1px solid rgba(25,223,208,.22);
-    }
-
-    .day-top-right.locked {
-      min-width: auto;
-      height: auto;
-      padding: 0;
-      background: transparent;
-      box-shadow: none;
-      color: rgba(255,255,255,.42);
-      font-size: 12px;
-      border: none;
-    }
-
-    .day-bookings {
-      margin-top: auto;
-      min-height: 112px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      gap: 7px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .booking-text {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-height: 24px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .signal-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      flex: 0 0 10px;
-      box-shadow: 0 0 8px currentColor;
-    }
-
-    .signal-normal {
-      color: var(--brand);
-      background: var(--brand);
-    }
-
-    .signal-priority {
-      color: var(--accent-coral);
-      background: var(--accent-coral);
-    }
-
-    .empty-note {
-      margin-top: auto;
-      min-height: 68px;
-      display: flex;
-      align-items: flex-end;
-      padding-top: calc(1.5em + 18px);
-      color: rgba(255,255,255,.38);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .full-ribbon {
-      position: absolute;
-      left: 50%;
-      top: calc(50% + 24px);
-      transform: translate(-50%, -50%) rotate(-12deg);
-      padding: 10px 22px;
-      border-radius: 999px;
-      background: rgba(255, 46, 166, .14);
-      color: #fff;
-      font-size: 14px;
-      font-weight: 1000;
-      letter-spacing: .18em;
-      border: 2.94px solid var(--accent-pink);
-      box-shadow:
-        0 10px 20px rgba(255,46,166,.12),
-        inset 0 1px 0 rgba(255,255,255,.1),
-        0 0 10px rgba(255,46,166,.12);
-      pointer-events: none;
-      z-index: 6;
-      backdrop-filter: blur(10px);
-    }
-
-    .day-pop {
-      position: absolute;
-      left: 50%;
-      top: 58%;
-      transform: translate(-50%, -50%) scale(.96);
-      width: 280px;
-      max-width: min(92vw, 280px);
-      padding: 16px 18px;
-      border-radius: 24px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-        rgba(8,9,14,.98);
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: 0 24px 48px rgba(0,0,0,.52);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .16s ease, transform .16s ease;
-      z-index: 9999;
-      overflow-wrap: anywhere;
-      backdrop-filter: blur(14px);
-    }
-
-    .day.col-0 .day-pop,
-    .day.col-1 .day-pop {
-      left: 10px;
-      right: auto;
-      transform: translate(0, -50%) scale(.96);
-    }
-
-    .day.col-5 .day-pop,
-    .day.col-6 .day-pop {
-      left: auto;
-      right: 10px;
-      transform: translate(0, -50%) scale(.96);
-    }
-
-    .day.has-info:hover .day-pop,
-    .day.has-info:focus-within .day-pop {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translate(-50%, -50%) scale(1);
-    }
-
-    .day.col-0.has-info:hover .day-pop,
-    .day.col-0.has-info:focus-within .day-pop,
-    .day.col-1.has-info:hover .day-pop,
-    .day.col-1.has-info:focus-within .day-pop,
-    .day.col-5.has-info:hover .day-pop,
-    .day.col-5.has-info:focus-within .day-pop,
-    .day.col-6.has-info:hover .day-pop,
-    .day.col-6.has-info:focus-within .day-pop {
-      transform: translate(0, -50%) scale(1);
-    }
-
-    .day-pop-title {
-      margin-bottom: 10px;
-      font-size: 16px;
-      font-weight: 1000;
-      color: var(--brand);
-      text-shadow: var(--brand-glow);
-    }
-
-    .day-pop-divider {
-      height: 1px;
-      margin: 10px 0 12px;
-      background: rgba(255,255,255,.12);
-    }
-
-    .day-pop-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 800;
-      line-height: 1.6;
-      overflow-wrap: anywhere;
-    }
-
-    .day-pop-full {
-      font-size: 14px;
-      font-weight: 1000;
-      color: var(--accent-coral);
-      letter-spacing: .08em;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 14px;
-      font-size: 13px;
-      color: #fff;
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      box-shadow: 0 0 8px currentColor;
-    }
-
-    .legend-normal { color: var(--brand); background: var(--brand); }
-    .legend-priority { color: var(--accent-coral); background: var(--accent-coral); }
-    .legend-locked { color: #8891a2; background: #8891a2; }
-
-    .bottom-layout {
-      display: grid;
-      grid-template-columns: 1.06fr .94fr;
-      gap: 22px;
-    }
-
-    .section {
-      padding: 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .section-title {
-      margin: 0 0 16px;
-      font-size: 24px;
-      font-weight: 1000;
-      letter-spacing: -.03em;
-    }
-
-    .section-title.brand-title {
-      color: var(--brand);
-      text-shadow: none;
-    }
-
-    .section-title.pink-title {
-      color: var(--accent-pink);
-      text-shadow: none;
-    }
-
-    .message {
-      display: none;
-      margin-top: 10px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      font-size: 14px;
-      font-weight: 900;
-      border: 1px solid rgba(255,255,255,.08);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-    }
-
-    .message.show { display: block; }
-    .message.error {
-      color: #fff3f7;
-      background: linear-gradient(180deg, rgba(255,117,152,.96), rgba(220,60,98,.92));
-    }
-    .message.success {
-      color: #061712;
-      background: linear-gradient(180deg, rgba(128,246,180,.96), rgba(54,202,160,.96));
-    }
-
-    form { display: grid; gap: 14px; }
-
-    .desktop-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      align-items: start;
-    }
-
-    .field {
-      display: grid;
-      gap: 7px;
-      min-width: 0;
-      width: 100%;
-    }
-
-    .field label {
-      font-size: 14px;
-      font-weight: 900;
-      color: #fff;
-      letter-spacing: .02em;
-    }
-
-    .hint {
-      font-size: 12px;
-      color: rgba(255,255,255,.52);
-    }
-
-    .input-wrap {
-      position: relative;
-      width: 100%;
-      height: 52px;
-    }
-
-    input[type="text"],
-    input[type="date"],
-    input[list] {
-      width: 100%;
-      height: 52px;
-      padding: 13px 14px;
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
-        rgba(10,11,17,.96);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      outline: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-      transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
-    }
-
-    input:focus {
-      border-color: rgba(25,223,208,.46);
-      box-shadow: 0 0 0 4px rgba(25,223,208,.08);
-      transform: translateY(-1px);
-    }
-
-    #username::placeholder,
-    #cpName::placeholder {
-      color: rgba(255,255,255,.34);
-    }
-
-    .lv-inline {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255,255,255,.72);
-      font-size: 13px;
-      font-weight: 900;
-      pointer-events: none;
-    }
-
-    .level-single input {
-      padding-right: 48px;
-    }
-
-    .date-row {
-      display: grid;
-      grid-template-columns: 1fr 56px;
-      gap: 10px;
-      align-items: center;
-      min-height: 52px;
-    }
-
-    .calendar-trigger {
-      width: 56px;
-      height: 52px;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      color: #071616;
-      font-size: 22px;
-      font-weight: 900;
-      background: linear-gradient(180deg, var(--brand), var(--brand-strong));
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.22),
-        inset 0 -3px 0 rgba(0,0,0,.18),
-        0 10px 18px rgba(25,223,208,.18);
-    }
-
-    .form-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 3px;
-    }
-
-    .btn-green {
-      min-height: 50px;
-      padding: 0 22px;
-      border-radius: 16px;
-      background: linear-gradient(180deg, #29e8d8, #09cfc0);
-      color: #071616;
-      font-size: 15px;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.28),
-        inset 0 -4px 0 rgba(0,0,0,.18),
-        0 10px 18px rgba(9,207,192,.18);
-    }
-
-    .btn-dark {
-      min-height: 50px;
-      padding: 0 22px;
-      border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
-        linear-gradient(180deg, #232635, #151825);
-      color: #fff;
-      font-size: 15px;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.07),
-        inset 0 -4px 0 rgba(0,0,0,.22),
-        0 10px 18px rgba(0,0,0,.18);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
-
-    .submit-cooldown {
-      opacity: .38 !important;
-      cursor: not-allowed !important;
-      filter: grayscale(.2);
-    }
-
-    .foot-note {
-      margin-top: 8px;
-      color: rgba(255,255,255,.52);
-      font-size: 12px;
-      line-height: 1.65;
-    }
-
-    .rules {
-      display: grid;
-      gap: 12px;
-    }
-
-    .rule-block {
-      padding: 16px 16px;
-      border-radius: 20px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-        rgba(10,11,17,.94);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-
-    .rule-block .plain-lines {
-      color: rgba(255,255,255,.82);
-      font-size: 14px;
-      line-height: 1.8;
-      white-space: pre-line;
-    }
-
-    .mini-calendar-pop {
-      position: absolute;
-      z-index: 30;
-      width: 320px;
-      max-width: calc(100vw - 32px);
-      padding: 14px;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,.1);
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-        rgba(7,8,12,.98);
-      box-shadow: 0 24px 48px rgba(0,0,0,.46);
-      display: none;
-      backdrop-filter: blur(14px);
-    }
-
-    .mini-calendar-pop.show { display: block; }
-
-    .mini-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .mini-head-title {
-      font-size: 15px;
-      font-weight: 1000;
-      color: #fff;
-    }
-
-    .mini-nav {
-      display: flex;
-      gap: 8px;
-    }
-
-    .mini-nav button {
-      width: 34px;
-      height: 34px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      color: #fff;
-      font-size: 18px;
-      font-weight: 1000;
-    }
-
-    .mini-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-
-    .mini-weekday {
-      text-align: center;
-      padding: 4px 0;
-      color: rgba(255,255,255,.72);
-      font-size: 11px;
-      font-weight: 1000;
-    }
-
-    .mini-day {
-      height: 36px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-        rgba(16,19,29,.98);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 1000;
-    }
-
-    .mini-day.disabled {
-      opacity: .28;
-      cursor: not-allowed;
-    }
-
-    .mini-day.selected {
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      color: #fff;
-    }
-
-    .mini-day.today {
-      outline: 2px solid rgba(255,46,166,.5);
-      outline-offset: 1px;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(255,46,166,.14), transparent 26%),
-        rgba(0,0,0,.72);
-      backdrop-filter: blur(6px);
-    }
-
-    .overlay.show { display: flex; }
-
-    .popup {
-      width: 100%;
-      max-width: 540px;
-      border-radius: 28px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.015)),
-        rgba(8,9,14,.98);
-      border: 1px solid rgba(255,255,255,.1);
-      box-shadow: 0 30px 70px rgba(0,0,0,.58);
-      overflow: hidden;
-    }
-
-    .popup-head {
-      padding: 28px 22px 10px;
-      text-align: center;
-    }
-
-    .popup-icon-wrap {
-      width: 106px;
-      height: 106px;
-      margin: 0 auto 18px;
-      border-radius: 28px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      box-shadow: inset 0 -10px 0 rgba(0,0,0,.14);
-    }
-
-    .popup-icon {
-      width: 50px;
-      height: 50px;
-    }
-
-    .popup-title {
-      margin: 0 0 8px;
-      color: #fff;
-      font-size: 28px;
-      font-weight: 1000;
-      letter-spacing: -.03em;
-    }
-
-    .popup-subtitle {
-      margin-bottom: 18px;
-      color: var(--accent-pink);
-      text-shadow: var(--accent-pink-glow);
-      font-size: 11px;
-      font-weight: 1000;
-      letter-spacing: .36em;
-      text-transform: uppercase;
-    }
-
-    .popup-body {
-      padding: 0 28px 20px;
-    }
-
-    .popup-scroll-wrap {
-      padding: 18px 8px 18px 18px;
-      border-radius: 24px;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.06);
-    }
-
-    .popup-scroll {
-      max-height: 292px;
-      overflow-y: auto;
-      padding-right: 16px;
-      color: rgba(255,255,255,.94);
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
-    .popup-scroll::-webkit-scrollbar { width: 8px; }
-    .popup-scroll::-webkit-scrollbar-thumb {
-      background: var(--accent-pink);
-      border-radius: 999px;
-    }
-
-    .rule-row {
-      display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 14px;
-      align-items: start;
-      margin-bottom: 18px;
-    }
-
-    .rule-num {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      display: grid;
-      place-items: center;
-      background: rgba(255,46,166,.1);
-      color: var(--accent-pink);
-      font-size: 18px;
-      font-weight: 1000;
-      margin-top: 2px;
-    }
-
-    .rule-text-pop strong { color: var(--brand); }
-
-    .popup-bottom-read {
-      margin-top: 12px;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .popup-inline-message {
-      display: none;
-      margin-top: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 13px;
-      font-weight: 900;
-      line-height: 1.5;
-      border: 1px solid rgba(255,255,255,.1);
-    }
-
-    .popup-inline-message.show {
-      display: block;
-    }
-
-    .popup-inline-message.error {
-      color: #fff3f7;
-      background: linear-gradient(180deg, rgba(255,117,152,.96), rgba(220,60,98,.92));
-    }
-
-    .popup-actions {
-      display: flex;
-      gap: 14px;
-      justify-content: space-between;
-      padding: 0 28px 28px;
-    }
-
-    .popup-actions .btn {
-      flex: 1;
-      min-height: 56px;
-      border-radius: 18px;
-    }
-
-    .popup-submit-ready {
-      opacity: 1 !important;
-      cursor: pointer !important;
-      filter: none !important;
-    }
-
-    .popup-submit-pink {
-      background: linear-gradient(180deg, var(--accent-pink), var(--accent-pink-strong));
-      color: #ffffff;
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.22),
-        inset 0 -4px 0 rgba(0,0,0,.2),
-        0 12px 20px rgba(255,46,166,.18);
-    }
-
-    @media (max-width: 980px) {
-      .bottom-layout { grid-template-columns: 1fr; }
-
-      .calendar-topbar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .month-controls { justify-content: flex-end; }
-    }
-
-    @media (max-width: 760px) {
-      body { padding: 12px; }
-
-      .hero-shell {
-        padding: 12px;
-      }
-
-      .calendar-shell {
-        max-height: 520px;
-        overflow: auto;
-      }
-
-      .calendar-card.manual-full .calendar-shell,
-      .calendar-card:hover .calendar-shell,
-      .calendar-card:focus-within .calendar-shell {
-        max-height: 1000px;
-      }
-
-      .calendar-grid {
-        transform: scale(.82);
-        transform-origin: top center;
-        width: 121.95%;
-        margin-left: -10.975%;
-        margin-bottom: -110px;
-      }
-
-      .day {
-        min-height: 148px;
-        padding: 9px 9px;
-      }
-
-      .weekday {
-        padding: 7px 3px;
-        font-size: 13px;
-      }
-
-      .day-num { font-size: 22px; }
-      .booking-text, .empty-note { font-size: 11px; }
-      .day-top-right { font-size: 10px; min-width: 26px; height: 14px; }
-
-      .full-ribbon {
-        font-size: 12px;
-        padding: 8px 16px;
-      }
-      @media (max-width: 760px) {
-      .day-pop {
-        position: fixed;
-        left: 50% !important;
-        right: auto !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) scale(.92) !important;
-        width: min(84vw, 300px);
-        max-width: min(84vw, 300px);
-        max-height: 72vh;
-        overflow-y: auto;
-        z-index: 10000;
-        border-radius: 22px;
-        padding: 14px;
-        box-sizing: border-box;
-      }
-      .day.has-info:hover .day-pop,
-      .day.has-info:focus-within .day-pop,
-      .day.has-info:active .day-pop {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(-50%, -50%) scale(1) !important;
-      }
-    }
-      
-      .day.has-info:hover .day-pop,
-      .day.has-info:focus-within .day-pop,
-      .day.has-info:active .day-pop {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(-50%, -50%) scale(1) !important;
-      }
-
-      .desktop-row { grid-template-columns: 1fr; }
-
-      .popup-title { font-size: 22px; }
-      .popup-subtitle {
-        letter-spacing: .22em;
-        font-size: 11px;
-      }
-
-      .mini-calendar-pop {
-        width: min(320px, calc(100vw - 24px));
-        right: 0;
-        left: auto;
-      }
-    }
-  </style>
+.nav-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.25);
+  padding: 0 24px;
+  margin: 12px 0 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 24px;
+  cursor: pointer;
+  transition: all .18s;
+  border-left: 2px solid transparent;
+  margin: 1px 0;
+}
+.nav-item:hover { background: rgba(255,255,255,.05); }
+.nav-item.active {
+  background: rgba(255,255,255,.08);
+  border-left-color: var(--item-color, #fff);
+}
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nav-label {
+  font-size: 13px;
+  color: rgba(255,255,255,.6);
+  font-weight: 500;
+  flex: 1;
+  transition: color .18s;
+}
+.nav-item.active .nav-label,
+.nav-item:hover .nav-label { color: rgba(255,255,255,.9); }
+.nav-sub {
+  font-size: 10px;
+  color: rgba(255,255,255,.3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 20px 24px 0;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+.progress-label {
+  font-size: 10px;
+  color: rgba(255,255,255,.3);
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+}
+.progress-track {
+  height: 3px;
+  background: rgba(255,255,255,.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--tasks-h), var(--chrome-h));
+  border-radius: 99px;
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+  width: 16.7%;
+}
+
+/* ── CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  min-height: 100vh;
+  padding: 56px 64px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+}
+
+/* ── COVER SLIDE ── */
+.slide-cover {
+  background: var(--ink);
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cover-rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.04);
+}
+
+.cover-inner { position: relative; z-index: 2; max-width: 720px; }
+.cover-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 99px;
+  padding: 6px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 32px;
+}
+.cover-tag span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #4ADE80;
+  animation: blink 2s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+.cover-h {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -.025em;
+  margin-bottom: 16px;
+}
+.cover-h .hl {
+  background: linear-gradient(135deg, var(--tasks-h), #7B35C2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cover-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,.45);
+  margin-bottom: 48px;
+  line-height: 1.7;
+}
+
+.tool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.tool-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.8);
+  cursor: pointer;
+  transition: all .2s;
+}
+.tool-chip:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.2); }
+.tool-chip .chip-icon { font-size: 18px; }
+
+/* ── CONTENT SLIDES ── */
+.slide-inner {
+  max-width: 860px;
+  width: 100%;
+}
+
+.slide-header { margin-bottom: 36px; }
+.slide-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slide-eyebrow::before {
+  content: '';
+  width: 24px; height: 2px;
+  background: var(--accent-color, var(--tasks-h));
+  border-radius: 99px;
+}
+.slide-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+.slide-title .accent { color: var(--accent-color, var(--tasks-h)); }
+.slide-desc {
+  font-size: 15px;
+  color: var(--mid);
+  margin-top: 10px;
+  max-width: 580px;
+  line-height: 1.75;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.card-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.card-title { font-size: 14px; font-weight: 700; }
+.card-tag {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-weight: 500;
+}
+.card-body { padding: 20px; }
+
+/* ── STEPS ── */
+.steps { display: flex; flex-direction: column; gap: 12px; }
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  border: 1px solid var(--pale);
+  transition: all .2s;
+  cursor: default;
+}
+.step:hover {
+  border-color: var(--accent-color, var(--tasks-h));
+  background: white;
+  transform: translateX(3px);
+}
+.step-num {
+  width: var(--step-size);
+  height: var(--step-size);
+  border-radius: 50%;
+  background: var(--accent-color, var(--tasks-h));
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-body { flex: 1; }
+.step-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--mid); line-height: 1.65; }
+.step-desc strong { color: var(--ink); font-weight: 600; }
+
+/* ── TIPS ── */
+.tip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  background: var(--accent-light, var(--tasks-l));
+  border-radius: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--ink);
+  line-height: 1.65;
+}
+.tip .tip-icon { flex-shrink: 0; font-size: 15px; }
+
+/* ── CODE PILL ── */
+.code {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--ink);
+  color: #C4E86B;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.code:hover { opacity: .8; }
+.code-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+
+/* ── GRID ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ── FEATURE BADGE ── */
+.feature-list { display: flex; flex-direction: column; gap: 10px; }
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: 10px;
+  border: 1px solid var(--pale);
+}
+.feature-bullet {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  background: var(--accent-color, var(--tasks-h));
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.feature-bullet svg { width: 11px; height: 11px; }
+.feature-text { font-size: 13px; line-height: 1.65; color: var(--ink); }
+.feature-text strong { font-weight: 700; }
+.feature-text .dim { color: var(--mid); }
+
+/* ── VISUAL MOCK ── */
+.calendar-mock {
+  background: #1C1C1E;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 16px 0;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.cal-header {
+  display: flex;
+  background: #2C2C2E;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  font-size: 11px;
+  color: rgba(255,255,255,.4);
+  font-family: 'JetBrains Mono', monospace;
+}
+.cal-day {
+  flex: 1;
+  padding: 8px 10px;
+  border-right: 1px solid rgba(255,255,255,.05);
+  font-size: 10px;
+}
+.cal-day:last-child { border-right: none; }
+.cal-day .day-num { color: rgba(255,255,255,.7); font-size: 12px; font-weight: 700; }
+.cal-row { display: flex; padding: 10px 0; }
+.cal-cell {
+  flex: 1;
+  padding: 4px 8px;
+  border-right: 1px solid rgba(255,255,255,.04);
+  min-height: 52px;
+}
+.cal-cell:last-child { border-right: none; }
+.cal-event {
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+}
+.cal-label {
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  opacity: .7;
+}
+
+/* ── TAB GROUP MOCK ── */
+.tab-bar {
+  display: flex;
+  align-items: center;
+  background: #E8E6E1;
+  border-radius: 10px;
+  padding: 6px;
+  gap: 3px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+.tab-group-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  border: 2px solid transparent;
+}
+.tab-item {
+  background: white;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+.tab-standalone {
+  background: #D0CCC5;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--mid);
+  white-space: nowrap;
+}
+.group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  background: var(--grp-color, #1A6FFF);
+  border-radius: 4px 4px 0 0;
+  padding: 2px 8px;
+  margin-bottom: -4px;
+  margin-left: 2px;
+  align-self: flex-end;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── CMD BOX ── */
+.cmd-box {
+  background: var(--ink);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: border-color .2s;
+  cursor: default;
+}
+.cmd-box:hover { border-color: var(--cmd-h); }
+.cmd-url {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.05);
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+.cmd-url-cursor { color: rgba(255,255,255,.3); font-size: 13px; }
+.cmd-url-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #C4E86B;
+  font-weight: 500;
+}
+.cmd-desc { font-size: 12px; color: rgba(255,255,255,.45); min-width: 120px; text-align: right; }
+.cmd-arrow { font-size: 18px; }
+
+/* ── SHORTCUT ── */
+.shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,.8);
+}
+.key {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cmd-box { cursor: pointer; }
+.copy-btn {
+  font-size: 14px;
+  opacity: .4;
+  transition: opacity .15s, transform .15s;
+  flex-shrink: 0;
+}
+.cmd-box:hover .copy-btn { opacity: 1; transform: scale(1.2); }
+.scroll-top-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 1.5px solid rgba(255,255,255,.15);
+  color: #fff;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .25s, transform .25s, background .18s, box-shadow .18s;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,.25);
+}
+.scroll-top-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.scroll-top-btn:hover {
+  background: var(--tasks-h);
+  border-color: var(--tasks-h);
+  box-shadow: 0 6px 24px rgba(26,111,255,.4);
+}
+.scroll-top-btn svg {
+  width: 18px; height: 18px;
+  transition: transform .18s;
+}
+.scroll-top-btn:hover svg { transform: translateY(-2px); }
+
+.copy-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #C4E86B;
+  color: #1A1714;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 99px;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+  z-index: 999;
+}
+.copy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity .55s cubic-bezier(.22,.61,.36,1), transform .55s cubic-bezier(.22,.61,.36,1);
+}
+.reveal.in { opacity: 1; transform: none; }
+.d1 { transition-delay: .06s; }
+.d2 { transition-delay: .13s; }
+.d3 { transition-delay: .2s; }
+.d4 { transition-delay: .27s; }
+.d5 { transition-delay: .34s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 860px) {
+  .app { flex-direction: column; height: auto; overflow: auto; }
+  .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 12px; gap: 4px; }
+  .sidebar-brand { border: none; padding: 8px; margin: 0; }
+  .nav-section-label { display: none; }
+  .nav-item { padding: 6px 12px; border-left: none; border-bottom: 2px solid transparent; }
+  .nav-item.active { border-bottom-color: var(--item-color); background: rgba(255,255,255,.06); }
+  .content { overflow: auto; }
+  .slide { padding: 36px 24px; min-height: auto; }
+  .two-col, .three-col { grid-template-columns: 1fr; }
+  .cover-h { font-size: 36px; }
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <section class="ui-card hero-shell">
-      <section class="ui-card calendar-card" id="calendarCard" aria-label="大神贊助月曆">
-        <div class="calendar-topbar">
-          <div class="calendar-title-wrap">
-            <h2 class="calendar-title" id="monthTitle">2026年 3月</h2>
-            <div class="mode-badge" id="modeBadge" role="button" tabindex="0" aria-label="切換月曆模式">
-              <span class="dot"></span>
-              <span id="modeText">兩週預覽模式</span>
-            </div>
-          </div>
 
-          <div class="month-controls">
-            <button class="btn icon-btn" type="button" id="prevMonthBtn" aria-label="上個月">&lt;</button>
-            <button class="btn icon-btn" type="button" id="nextMonthBtn" aria-label="下個月">&gt;</button>
-          </div>
-        </div>
-
-        <div class="calendar-shell" id="calendarShell">
-          <div class="calendar-grid" id="calendarGrid"></div>
-
-          <div class="legend">
-            <div class="legend-item"><span class="legend-dot legend-normal"></span> 一般預約</div>
-            <div class="legend-item"><span class="legend-dot legend-priority"></span> 優先預約</div>
-            <div class="legend-item"><span class="legend-dot legend-locked"></span> 即將開放</div>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <section class="bottom-layout">
-      <div class="ui-card">
-        <div class="section">
-          <h2 class="section-title brand-title">預約資訊</h2>
-
-          <form id="bookingForm" novalidate>
-            <div class="desktop-row">
-              <div class="field">
-                <label for="username">會員帳號（需為＠ID）</label>
-                <input id="username" name="username" type="text" placeholder="abc123" autocomplete="off" />
-                <div class="hint">請填寫 @ 後正確英數 ID，非中文暱稱</div>
-              </div>
-
-              <div class="field">
-                <label for="cpName">推薦主播（需為＠ID）</label>
-                <input id="cpName" name="cpName" type="text" placeholder="abc123" autocomplete="off" />
-                <div class="hint">請填寫 @ 後正確英數 ID，非中文暱稱</div>
-              </div>
-
-              <div class="field">
-                <label for="levelInput">會員當前等級</label>
-                <div class="input-wrap level-single">
-                  <input id="levelInput" name="levelInput" type="text" list="levelList" inputmode="numeric" />
-                  <span class="lv-inline">LV</span>
-                </div>
-                <datalist id="levelList"></datalist>
-              </div>
-
-              <div class="field" style="position:relative;" id="dateFieldWrap">
-                <label for="bookingDate">曝光日期</label>
-                <div class="date-row">
-                  <input id="bookingDate" name="bookingDate" type="date" />
-                  <button class="calendar-trigger" type="button" id="miniCalendarBtn" aria-label="開啟迷你月曆">📅</button>
-                </div>
-
-                <div class="mini-calendar-pop" id="miniCalendarPop">
-                  <div class="mini-head">
-                    <div class="mini-head-title" id="miniTitle"></div>
-                    <div class="mini-nav">
-                      <button type="button" id="miniPrevBtn">&lt;</button>
-                      <button type="button" id="miniNextBtn">&gt;</button>
-                    </div>
-                  </div>
-                  <div class="mini-grid" id="miniCalendarGrid"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button class="btn btn-green" type="submit" id="submitBookingBtn">送出預約</button>
-              <a class="btn btn-dark" id="resetBtn" href="https://swag.live/" target="_blank" rel="noopener noreferrer">線上客服</a>
-            </div>
-
-            <div class="message" id="messageBox" role="status" aria-live="polite"></div>
-
-            <div class="foot-note">
-              預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議預約前先與主播確認可曝光之開播日期。
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="ui-card">
-        <div class="section">
-          <h2 class="section-title pink-title">規則說明</h2>
-          <div class="rules">
-            <div class="rule-block">
-              <div class="plain-lines">一、申請資格與頻率
-Lv.50～Lv.89：每 1 個月 可申請 1 次。
-Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 權益。
-（實際可申請時間將依系統紀錄為準）</div>
-            </div>
-
-            <div class="rule-block">
-              <div class="plain-lines">二、日期開放規則
-1. 當月名額於 每月 1 日起開放預約（當月首日名額可於前一日預約），每日名額有限，額滿即截止。福利無法遞延至次月，亦 無法提前預約次月首日以外之日期。
-2. 每月名額通常於當月中旬即會陸續被預約至月底，如有需求請儘早安排，以免向隅。
-3. 為避免佔用名額影響其他主播權益，預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議您於預約前，先與主播確認可曝光之開播日期。</div>
-            </div>
-
-            <div class="rule-block">
-              <div class="plain-lines">三、名額規則
-1. 每日一般名額固定為 3 位。
-2. 若一般名額已滿，月曆將清楚顯示 FULL，即一般預約僅可以選擇其他開放預約中的日期。
-3. 月曆只顯示預約成功的推薦主播ID。</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<div class="app">
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="eyebrow">工作小工具指南</div>
+    <h1>效率<br>工具包</h1>
+    <div class="sub">Google Tasks & Chrome</div>
   </div>
 
-  <div class="overlay" id="ruleOverlay" aria-hidden="true">
-    <div class="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
-      <div class="popup-head">
-        <div class="popup-icon-wrap">
-          <svg class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"></path>
-            <path d="M9.5 12.2l1.8 1.8 3.5-3.7"></path>
-          </svg>
+  <div class="nav-section-label">目錄</div>
+  <div class="nav-item active" data-target="cover" style="--item-color:#fff">
+    <div class="nav-dot" style="background:#fff"></div>
+    <span class="nav-label">封面</span>
+    <span class="nav-sub">00</span>
+  </div>
+
+  <div class="nav-section-label">Chrome 工具</div>
+  <div class="nav-item" data-target="tab-group" style="--item-color:#0B7C4F">
+    <div class="nav-dot" style="background:#0B7C4F"></div>
+    <span class="nav-label">分頁群組</span>
+    <span class="nav-sub">01</span>
+  </div>
+  <div class="nav-item" data-target="chrome-cmd" style="--item-color:#7B35C2">
+    <div class="nav-dot" style="background:#7B35C2"></div>
+    <span class="nav-label">行動指令</span>
+    <span class="nav-sub">02</span>
+  </div>
+
+  <div class="nav-section-label">Google Tasks</div>
+  <div class="nav-item" data-target="tasks-basic" style="--item-color:#1A6FFF">
+    <div class="nav-dot" style="background:#1A6FFF"></div>
+    <span class="nav-label">建立Task清單 與管理待辦</span>
+    <span class="nav-sub">03</span>
+  </div>
+  <div class="nav-item" data-target="tasks-advanced" style="--item-color:#1A6FFF">
+    <div class="nav-dot" style="background:#1A6FFF"></div>
+    <span class="nav-label">進階功能</span>
+    <span class="nav-sub">04</span>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="progress-label" id="progressLabel">進度 1 / 5</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+</nav>
+
+<!-- ── CONTENT ── -->
+<main class="content" id="content">
+
+  <!-- ══ COVER ══ -->
+  <section class="slide slide-cover" id="cover" data-index="0">
+    <div class="cover-rings">
+      <div class="ring" style="width:300px;height:300px;"></div>
+      <div class="ring" style="width:500px;height:500px;"></div>
+      <div class="ring" style="width:720px;height:720px;"></div>
+    </div>
+    <div class="cover-inner">
+      <div class="cover-tag"><span></span> 工作效率 · 工具介紹</div>
+      <h1 class="cover-h">讓工作<br><span class="hl">更有條理</span><br>的小工具</h1>
+      <p class="cover-sub">Google Tasks 任務管理 × Chrome 瀏覽器技巧<br>簡單上手，立刻提升每日工作效率</p>
+      <div class="tool-chips">
+        <div class="tool-chip" onclick="goTo('tab-group')">
+          <span class="chip-icon">🗂</span> Chrome 分頁群組
         </div>
-        <div class="popup-title" id="popupTitle">預約規則說明</div>
-        <div class="popup-subtitle">Security &amp; Rules Confirmation</div>
-      </div>
-
-      <div class="popup-body">
-        <div class="popup-scroll-wrap">
-          <div class="popup-scroll" id="popupScroll">
-            <div class="rule-row">
-              <div class="rule-num">1</div>
-              <div class="rule-text-pop">
-                <strong>一、申請資格與頻率</strong><br>
-                Lv.50～Lv.89：每 1 個月 可申請 1 次<br>
-                Lv.90 以上：每 1 個月 可申請 2 次，並享有 無條件優先置頂 權益<br>
-                （實際可申請時間將依系統紀錄為準）
-              </div>
-            </div>
-
-            <div class="rule-row">
-              <div class="rule-num">2</div>
-              <div class="rule-text-pop">
-                <strong>二、日期開放規則</strong><br>
-                1. 當月名額於 每月 1 日起開放預約（當月首日名額可於前一日預約），每日名額有限，額滿即截止。福利無法遞延至次月，亦 無法提前預約次月首日以外之日期。<br>
-                2. 每月名額通常於當月中旬即會陸續被預約至月底，如有需求請儘早安排，以免向隅。<br>
-                3. 為避免佔用名額影響其他主播權益，預約完成後恕無法取消或改期；若主播當日未開播，該次福利不予重置。建議您於預約前，先與主播確認可曝光之開播日期。
-              </div>
-            </div>
-
-            <div class="rule-row" style="margin-bottom:0;">
-              <div class="rule-num">3</div>
-              <div class="rule-text-pop">
-                <strong>三、名額規則</strong><br>
-                1. 每日一般名額固定為 3 位。<br>
-                2. 若一般名額已滿，月曆將清楚顯示 FULL，即一般預約僅可以選擇其他開放預約中的日期。<br>
-                3. 月曆只顯示預約成功的推薦主播ID。
-              </div>
-            </div>
-            <div style="height:36px;"></div>
-          </div>
+        <div class="tool-chip" onclick="goTo('chrome-cmd')">
+          <span class="chip-icon">⌨️</span> Chrome 行動指令
         </div>
-
-        <div class="popup-bottom-read">請閱讀規則說明，確認無誤後點擊下方「同意且送出」按鈕</div>
-
-        <div class="popup-inline-message" id="popupErrorBox" aria-live="polite"></div>
-      </div>
-
-      <div class="popup-actions">
-        <button class="btn btn-dark" type="button" id="popupCancelBtn">取消</button>
-        <button class="btn popup-submit-pink" type="button" id="popupSubmitBtn" disabled>同意且送出</button>
+        <div class="tool-chip" onclick="goTo('tasks-basic')">
+          <span class="chip-icon">✅</span> Google Tasks 基礎
+        </div>
+        <div class="tool-chip" onclick="goTo('tasks-advanced')">
+          <span class="chip-icon">⭐</span> Tasks 進階功能
+        </div>
       </div>
     </div>
-  </div>
-
-  <script>
-    (() => {
-      "use strict";
-
-      const STORAGE_KEY = "god_sponsorship_bookings_v19";
-      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjw9C-JYBpfvwT8wPTYaNO7BD1tYx-PRXyRW2tD-cCgmhj4ZEsteZMCrotdtNPt7t_/exec";
-      const BASE_SLOTS_PER_DAY = 3;
-      const WEEKDAYS = ["日", "一", "二", "三", "四", "五", "六"];
-      const ID_PATTERN = /^[a-z0-9._-]+$/;
-      const JSONP_TIMEOUT = 15000;
-
-      const MOCK_BOOKINGS = [];
-
-      const els = {
-        monthTitle: document.getElementById("monthTitle"),
-        calendarGrid: document.getElementById("calendarGrid"),
-        prevMonthBtn: document.getElementById("prevMonthBtn"),
-        nextMonthBtn: document.getElementById("nextMonthBtn"),
-        bookingForm: document.getElementById("bookingForm"),
-        username: document.getElementById("username"),
-        levelInput: document.getElementById("levelInput"),
-        cpName: document.getElementById("cpName"),
-        bookingDate: document.getElementById("bookingDate"),
-        messageBox: document.getElementById("messageBox"),
-        resetBtn: document.getElementById("resetBtn"),
-        submitBookingBtn: document.getElementById("submitBookingBtn"),
-        calendarShell: document.getElementById("calendarShell"),
-        modeText: document.getElementById("modeText"),
-        modeBadge: document.getElementById("modeBadge"),
-        miniCalendarBtn: document.getElementById("miniCalendarBtn"),
-        miniCalendarPop: document.getElementById("miniCalendarPop"),
-        miniCalendarGrid: document.getElementById("miniCalendarGrid"),
-        miniTitle: document.getElementById("miniTitle"),
-        miniPrevBtn: document.getElementById("miniPrevBtn"),
-        miniNextBtn: document.getElementById("miniNextBtn"),
-        levelList: document.getElementById("levelList"),
-        ruleOverlay: document.getElementById("ruleOverlay"),
-        popupSubmitBtn: document.getElementById("popupSubmitBtn"),
-        popupCancelBtn: document.getElementById("popupCancelBtn"),
-        popupScroll: document.getElementById("popupScroll"),
-        popupErrorBox: document.getElementById("popupErrorBox"),
-        dateFieldWrap: document.getElementById("dateFieldWrap"),
-        calendarCard: document.getElementById("calendarCard")
-      };
-
-      const today = startOfDay(new Date());
-      let bookings = loadBookings();
-      let selectedDateStr = "";
-      let viewYear = today.getFullYear();
-      let viewMonth = today.getMonth();
-      let miniYear = today.getFullYear();
-      let miniMonth = today.getMonth();
-      let pendingSubmission = null;
-      let cooldownTimer = null;
-      let popupScrolledToBottom = false;
-      let isFullBrowseMode = false;
-
-      init();
-
-      async function init() {
-        populateLevelList();
-        applyDateInputLimits();
-        bindEvents();
-        updateCalendarModeUI();
-        renderCalendar();
-        renderMiniCalendar();
-        await syncBookingsFromGoogleSheet();
-        renderCalendar();
-        renderMiniCalendar();
-      }
-
-      function populateLevelList() {
-        els.levelList.innerHTML = "";
-        for (let i = 50; i <= 100; i++) {
-          const option = document.createElement("option");
-          option.value = String(i);
-          els.levelList.appendChild(option);
-        }
-      }
-
-      function bindEvents() {
-        els.username.addEventListener("blur", normalizeIdInput);
-        els.cpName.addEventListener("blur", normalizeIdInput);
-
-        els.levelInput.addEventListener("input", () => {
-          const converted = normalizeNumberString(els.levelInput.value);
-          els.levelInput.value = converted.replace(/[^\d]/g, "");
-        });
-
-        els.bookingDate.addEventListener("change", () => {
-          selectedDateStr = els.bookingDate.value || "";
-          if (selectedDateStr) {
-            const d = parseDateString(selectedDateStr);
-            viewYear = d.getFullYear();
-            viewMonth = d.getMonth();
-            miniYear = d.getFullYear();
-            miniMonth = d.getMonth();
-            renderCalendar();
-            renderMiniCalendar();
-          }
-        });
-
-        els.bookingDate.addEventListener("pointerdown", handleDateFieldOpen);
-        els.bookingDate.addEventListener("focus", handleDateFieldOpen);
-        els.bookingDate.addEventListener("click", handleDateFieldOpen);
-
-        if (els.dateFieldWrap) {
-          els.dateFieldWrap.addEventListener("click", (e) => {
-            if (e.target !== els.miniCalendarBtn && !els.miniCalendarPop.contains(e.target)) {
-              goToCalendarFromDateField();
-            }
-          });
-        }
-
-        els.prevMonthBtn.addEventListener("click", () => changeMonth(-1));
-        els.nextMonthBtn.addEventListener("click", () => changeMonth(1));
-
-        els.bookingForm.addEventListener("submit", handleSubmit);
-
-        els.modeBadge.addEventListener("click", toggleCalendarMode);
-        els.modeBadge.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            toggleCalendarMode();
-          }
-        });
-
-        els.calendarCard.addEventListener("mouseenter", () => {
-          if (!isFullBrowseMode) {
-            els.calendarCard.classList.add("manual-full");
-          }
-        });
-
-        els.calendarCard.addEventListener("mouseleave", () => {
-          if (!isFullBrowseMode) {
-            els.calendarCard.classList.remove("manual-full");
-          }
-        });
-
-        els.miniCalendarBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const baseDate = selectedDateStr ? parseDateString(selectedDateStr) : new Date(viewYear, viewMonth, 1);
-          miniYear = baseDate.getFullYear();
-          miniMonth = baseDate.getMonth();
-          renderMiniCalendar();
-          toggleMiniCalendar();
-        });
-
-        els.miniPrevBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const next = new Date(miniYear, miniMonth - 1, 1);
-          miniYear = next.getFullYear();
-          miniMonth = next.getMonth();
-          renderMiniCalendar();
-        });
-
-        els.miniNextBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const next = new Date(miniYear, miniMonth + 1, 1);
-          miniYear = next.getFullYear();
-          miniMonth = next.getMonth();
-          renderMiniCalendar();
-        });
-
-        document.addEventListener("click", (e) => {
-          if (!els.miniCalendarPop.contains(e.target) && e.target !== els.miniCalendarBtn) {
-            closeMiniCalendar();
-          }
-        });
-
-        els.popupSubmitBtn.addEventListener("click", finalizeSubmission);
-        els.popupCancelBtn.addEventListener("click", closePopup);
-        els.ruleOverlay.addEventListener("click", (e) => {
-          if (e.target === els.ruleOverlay) closePopup();
-        });
-
-        els.popupScroll.addEventListener("scroll", handlePopupScroll);
-      }
-
-      function toggleCalendarMode() {
-        isFullBrowseMode = !isFullBrowseMode;
-        updateCalendarModeUI();
-      }
-
-      function updateCalendarModeUI() {
-        els.modeText.textContent = isFullBrowseMode ? "全月瀏覽模式" : "兩週預覽模式";
-        els.calendarCard.classList.toggle("manual-full", isFullBrowseMode);
-      }
-
-      function loadBookings() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_BOOKINGS));
-          return [];
-        }
-        try {
-          const parsed = JSON.parse(raw);
-          if (!Array.isArray(parsed)) return [];
-          return sortBookings(parsed);
-        } catch {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-          return [];
-        }
-      }
-
-      function saveBookings() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-      }
-
-      function sortBookings(list) {
-        return [...list].sort((a, b) => {
-          const aPriority = a.priority ? 1 : 0;
-          const bPriority = b.priority ? 1 : 0;
-          if (a.date !== b.date) return a.date.localeCompare(b.date);
-          if (aPriority !== bPriority) return aPriority - bPriority;
-          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-        });
-      }
-
-      function normalizeIdInput(event) {
-        event.target.value = String(event.target.value || "").trim();
-      }
-
-      function normalizeNumberString(value) {
-        return String(value || "").replace(/[０-９]/g, ch =>
-          String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)
-        );
-      }
-
-      function startOfDay(date) {
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      }
-
-      function parseDateString(dateStr) {
-        if (!dateStr) return null;
-        const [y, m, d] = dateStr.split("-").map(Number);
-        if (!y || !m || !d) return null;
-        return new Date(y, m - 1, d);
-      }
-
-      function formatDateString(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, "0");
-        const d = String(date.getDate()).padStart(2, "0");
-        return `${y}-${m}-${d}`;
-      }
-
-      function monthKeyFromDateStr(dateStr) {
-        return dateStr.slice(0, 7);
-      }
-
-      function isEndOfMonth(date) {
-        return date.getDate() === new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-      }
-
-      function isDateBookable(date) {
-        const target = startOfDay(date);
-        if (target < today) return false;
-
-        const currentMonthKey = monthKeyFromDateStr(formatDateString(today));
-        const targetMonthKey = monthKeyFromDateStr(formatDateString(target));
-
-        if (targetMonthKey === currentMonthKey) return true;
-
-        if (isEndOfMonth(today)) {
-          const nextFirst = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-          return target.getTime() === nextFirst.getTime();
-        }
-
-        return false;
-      }
-
-      function applyDateInputLimits() {
-        els.bookingDate.min = formatDateString(today);
-      }
-
-      function containsUppercase(value) {
-        return /[A-Z]/.test(String(value || ""));
-      }
-
-      function normalizeAtId(value) {
-        let v = String(value || "").trim();
-        if (!v) return "";
-        if (v.startsWith("@")) v = v.slice(1);
-        return "@" + v;
-      }
-
-      function validateFlexibleId(value, type) {
-        if (!value) return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
-        if (containsUppercase(value)) return "ID請填寫小寫英文字母";
-        let v = String(value).trim();
-        if (v.startsWith("@")) v = v.slice(1);
-        if (!v || !ID_PATTERN.test(v)) {
-          return type === "user" ? "請確認輸入的會員帳號" : "請提交正確的主播帳號";
-        }
-        return "";
-      }
-
-      function validateLevel(levelRaw) {
-        const normalized = normalizeNumberString(levelRaw).replace(/[^\d]/g, "");
-        if (!normalized) return "請提交正確的帳號等級";
-        const level = Number(normalized);
-        if (!Number.isInteger(level)) return "請提交正確的帳號等級";
-        if (level < 50) return "此福利僅開放於50等以上之會員";
-        return "";
-      }
-
-      function getMonthlyLimit(level) {
-        return level >= 90 ? 2 : 1;
-      }
-
-      function getBookingsForDate(dateStr) {
-        return sortBookings(bookings.filter(item => item.date === dateStr));
-      }
-
-      function getRegularBookingsForDate(dateStr) {
-        return getBookingsForDate(dateStr).filter(item => !item.priority);
-      }
-
-      function getRemainingBaseSlots(dateStr) {
-        const used = getRegularBookingsForDate(dateStr).length;
-        return Math.max(0, BASE_SLOTS_PER_DAY - used);
-      }
-
-      function getBookedCountForBadge(dateStr) {
-        return getRegularBookingsForDate(dateStr).length;
-      }
-
-      function getUserMonthlyBookingsCount(username, monthKey) {
-        return bookings.filter(item =>
-          item.username === username && monthKeyFromDateStr(item.date) === monthKey
-        ).length;
-      }
-
-      function hasSameCpOnDate(dateStr, cpName) {
-        return bookings.some(item => item.date === dateStr && item.cpName === cpName);
-      }
-
-      function validateSubmission(data) {
-        const usernameError = validateFlexibleId(data.username, "user");
-        if (usernameError) return usernameError;
-
-        const cpError = validateFlexibleId(data.cpName, "cp");
-        if (cpError) return cpError;
-
-        const levelError = validateLevel(data.level);
-        if (levelError) return levelError;
-
-        if (!data.date) return "請選擇曝光日期";
-
-        const targetDate = parseDateString(data.date);
-        if (!targetDate || Number.isNaN(targetDate.getTime())) return "曝光日期格式錯誤";
-
-        if (!isDateBookable(targetDate)) {
-          return "此日期不在可預約範圍內";
-        }
-
-        const normalizedLevel = normalizeNumberString(data.level).replace(/[^\d]/g, "");
-        const level = Number(normalizedLevel);
-        const monthKey = monthKeyFromDateStr(data.date);
-        const count = getUserMonthlyBookingsCount(data.username, monthKey);
-        const limit = getMonthlyLimit(level);
-
-        if (count >= limit) {
-          return level >= 90 ? "Lv.90 以上：每 1 個月僅限申請 2 次" : "Lv.50～Lv.89：每 1 個月僅限申請 1 次";
-        }
-
-        if (hasSameCpOnDate(data.date, data.cpName)) {
-          return "相同日期中，相同主播ID僅限預約一次";
-        }
-
-        const remaining = getRemainingBaseSlots(data.date);
-        if (remaining <= 0 && level < 90) {
-          return "您選擇的日期名額已滿";
-        }
-
-        return "";
-      }
-
-      function showMessage(text, type = "success") {
-        els.messageBox.textContent = text;
-        els.messageBox.className = `message show ${type}`;
-      }
-
-      function clearMessage() {
-        els.messageBox.textContent = "";
-        els.messageBox.className = "message";
-      }
-
-      function showPopupError(text) {
-        els.popupErrorBox.textContent = text;
-        els.popupErrorBox.className = "popup-inline-message show error";
-      }
-
-      function clearPopupError() {
-        els.popupErrorBox.textContent = "";
-        els.popupErrorBox.className = "popup-inline-message";
-      }
-
-      function updatePopupSubmitState() {
-        const shouldEnable = popupScrolledToBottom;
-        els.popupSubmitBtn.disabled = !shouldEnable;
-
-        if (shouldEnable) {
-          els.popupSubmitBtn.classList.add("popup-submit-ready");
-        } else {
-          els.popupSubmitBtn.classList.remove("popup-submit-ready");
-        }
-      }
-
-      function handlePopupScroll() {
-        const el = els.popupScroll;
-        const reachedBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 8;
-        if (reachedBottom) {
-          popupScrolledToBottom = true;
-          updatePopupSubmitState();
-        }
-      }
-
-      function startSubmitCooldown() {
-        const btn = els.submitBookingBtn;
-        btn.disabled = true;
-        btn.classList.add("submit-cooldown");
-        let remaining = 45;
-        btn.textContent = `送出預約（${remaining}s）`;
-
-        clearInterval(cooldownTimer);
-        cooldownTimer = setInterval(() => {
-          remaining -= 1;
-          if (remaining <= 0) {
-            clearInterval(cooldownTimer);
-            btn.disabled = false;
-            btn.classList.remove("submit-cooldown");
-            btn.textContent = "送出預約";
-            return;
-          }
-          btn.textContent = `送出預約（${remaining}s）`;
-        }, 1000);
-      }
-
-      function sendBookingToGoogleSheet(bookingData) {
-        return new Promise((resolve, reject) => {
-          const callbackName = `jsonpCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-          const script = document.createElement("script");
-          const params = new URLSearchParams({
-            action: "write",
-            callback: callbackName,
-            username: bookingData.username,
-            level: String(bookingData.level),
-            cpName: bookingData.cpName,
-            date: bookingData.date,
-            priority: String(bookingData.priority)
-          });
-
-          let timer = null;
-
-          function cleanup() {
-            if (timer) clearTimeout(timer);
-            if (script.parentNode) script.parentNode.removeChild(script);
-            try {
-              delete window[callbackName];
-            } catch {
-              window[callbackName] = undefined;
-            }
-          }
-
-          window[callbackName] = function(result) {
-            cleanup();
-            if (!result || result.success !== true) {
-              reject(new Error(result && result.message ? result.message : "寫入失敗"));
-              return;
-            }
-            resolve(result);
-          };
-
-          script.onerror = function() {
-            cleanup();
-            reject(new Error("無法連線至 Google Apps Script，請確認部署網址與存取權限"));
-          };
-
-          timer = setTimeout(() => {
-            cleanup();
-            reject(new Error("連線逾時，請稍後再試"));
-          }, JSONP_TIMEOUT);
-
-          script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
-          document.body.appendChild(script);
-        });
-      }
-
-      function fetchBookingsFromGoogleSheet() {
-        return new Promise((resolve, reject) => {
-          const callbackName = `jsonpReadCallback_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
-          const script = document.createElement("script");
-          const params = new URLSearchParams({
-            action: "read",
-            callback: callbackName
-          });
-
-          let timer = null;
-
-          function cleanup() {
-            if (timer) clearTimeout(timer);
-            if (script.parentNode) script.parentNode.removeChild(script);
-            try {
-              delete window[callbackName];
-            } catch {
-              window[callbackName] = undefined;
-            }
-          }
-
-          window[callbackName] = function(result) {
-            cleanup();
-            if (!result || result.success !== true || !Array.isArray(result.bookings)) {
-              reject(new Error(result && result.message ? result.message : "讀取失敗"));
-              return;
-            }
-            resolve(result.bookings);
-          };
-
-          script.onerror = function() {
-            cleanup();
-            reject(new Error("無法讀取 Google 試算表資料，請確認 Apps Script 部署與權限"));
-          };
-
-          timer = setTimeout(() => {
-            cleanup();
-            reject(new Error("讀取資料逾時，請稍後再試"));
-          }, JSONP_TIMEOUT);
-
-          script.src = `${APPS_SCRIPT_URL}?${params.toString()}`;
-          document.body.appendChild(script);
-        });
-      }
-
-      async function syncBookingsFromGoogleSheet() {
-        try {
-          const sheetBookings = await fetchBookingsFromGoogleSheet();
-
-          bookings = sortBookings(
-            sheetBookings.map(item => ({
-              username: normalizeAtId(String(item.username || "").trim()),
-              level: Number(item.level || 0),
-              cpName: String(item.cpName || "").trim().startsWith("@")
-                ? String(item.cpName || "").trim()
-                : normalizeAtId(String(item.cpName || "").trim()),
-              date: String(item.date || "").trim(),
-              priority: Boolean(item.priority),
-              createdAt: item.createdAt || new Date().toISOString()
-            }))
-          );
-
-          saveBookings();
-        } catch (error) {
-          console.error("讀取試算表資料失敗：", error);
-        }
-      }
-
-      function handleSubmit(event) {
-        event.preventDefault();
-        clearMessage();
-
-        if (els.submitBookingBtn.disabled) return;
-
-        const rawLevel = normalizeNumberString(String(els.levelInput.value || "")).replace(/[^\d]/g, "");
-        els.levelInput.value = rawLevel;
-
-        const rawData = {
-          username: String(els.username.value || "").trim(),
-          level: rawLevel,
-          cpName: String(els.cpName.value || "").trim(),
-          date: String(els.bookingDate.value || "").trim()
-        };
-
-        const validateData = {
-          username: normalizeAtId(rawData.username),
-          level: rawData.level,
-          cpName: normalizeAtId(rawData.cpName),
-          date: rawData.date
-        };
-
-        const error = validateSubmission(validateData);
-        if (error) {
-          showMessage(error, "error");
-          return;
-        }
-
-        const levelNum = Number(rawData.level);
-        pendingSubmission = {
-          username: normalizeAtId(rawData.username),
-          level: levelNum,
-          cpName: normalizeAtId(rawData.cpName),
-          date: rawData.date,
-          priority: levelNum >= 90 && getRemainingBaseSlots(rawData.date) <= 0
-        };
-
-        openPopup();
-      }
-
-      async function finalizeSubmission() {
-        if (!pendingSubmission) return;
-        if (els.popupSubmitBtn.disabled) return;
-
-        clearPopupError();
-        els.popupSubmitBtn.disabled = true;
-        els.popupSubmitBtn.textContent = "送出中...";
-
-        try {
-          const payload = {
-            username: pendingSubmission.username,
-            level: pendingSubmission.level,
-            cpName: pendingSubmission.cpName,
-            date: pendingSubmission.date,
-            priority: pendingSubmission.priority
-          };
-
-          const sheetResult = await sendBookingToGoogleSheet(payload);
-
-          if (!sheetResult || sheetResult.success !== true) {
-            throw new Error(sheetResult?.message || "寫入失敗");
-          }
-
-          bookings.push({
-            ...pendingSubmission,
-            createdAt: new Date().toISOString()
-          });
-
-          bookings = sortBookings(bookings);
-          saveBookings();
-
-          selectedDateStr = pendingSubmission.date;
-          const bookedDate = parseDateString(pendingSubmission.date);
-          viewYear = bookedDate.getFullYear();
-          viewMonth = bookedDate.getMonth();
-          miniYear = bookedDate.getFullYear();
-          miniMonth = bookedDate.getMonth();
-
-          closePopup();
-          startSubmitCooldown();
-          showMessage(
-            pendingSubmission.priority ? "預約成功，已列為優先預約" : "預約成功",
-            "success"
-          );
-          renderCalendar();
-          renderMiniCalendar();
-
-        } catch (error) {
-          console.error("寫入試算表失敗：", error);
-          showPopupError(`預約資料寫入失敗：${error.message}`);
-          els.popupSubmitBtn.textContent = "同意且送出";
-          updatePopupSubmitState();
-        }
-      }
-
-      function openPopup() {
-        clearPopupError();
-        popupScrolledToBottom = false;
-        els.popupSubmitBtn.textContent = "同意且送出";
-        updatePopupSubmitState();
-
-        els.ruleOverlay.classList.add("show");
-        els.ruleOverlay.setAttribute("aria-hidden", "false");
-
-        requestAnimationFrame(() => {
-          els.popupScroll.scrollTop = 0;
-
-          const noScrollNeeded = els.popupScroll.scrollHeight <= els.popupScroll.clientHeight + 8;
-          if (noScrollNeeded) {
-            popupScrolledToBottom = true;
-            updatePopupSubmitState();
-          }
-        });
-      }
-
-      function closePopup() {
-        els.ruleOverlay.classList.remove("show");
-        els.ruleOverlay.setAttribute("aria-hidden", "true");
-        els.popupSubmitBtn.textContent = "同意且送出";
-        clearPopupError();
-        popupScrolledToBottom = false;
-        updatePopupSubmitState();
-        pendingSubmission = null;
-      }
-
-      function changeMonth(delta) {
-        const next = new Date(viewYear, viewMonth + delta, 1);
-        viewYear = next.getFullYear();
-        viewMonth = next.getMonth();
-        renderCalendar();
-      }
-
-      function handleDateFieldOpen() {
-        goToCalendarFromDateField();
-      }
-
-      function setSelectedDate(dateStr) {
-        const date = parseDateString(dateStr);
-        if (!date) return;
-        selectedDateStr = dateStr;
-        els.bookingDate.value = dateStr;
-        closeMiniCalendar();
-        clearMessage();
-        renderCalendar();
-        renderMiniCalendar();
-      }
-
-      function goToCalendarFromDateField() {
-        const baseDate = selectedDateStr
-          ? parseDateString(selectedDateStr)
-          : (els.bookingDate.value
-              ? parseDateString(els.bookingDate.value)
-              : new Date(viewYear, viewMonth, 1));
-
-        if (baseDate) {
-          viewYear = baseDate.getFullYear();
-          viewMonth = baseDate.getMonth();
-          renderCalendar();
-        }
-
-        requestAnimationFrame(() => {
-          if (els.calendarCard) {
-            els.calendarCard.scrollIntoView({
-              behavior: "smooth",
-              block: "start"
-            });
-          }
-        });
-      }
-
-      function buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth) {
-        if (!dayBookings.length) return "";
-
-      const regularFull = getRemainingBaseSlots(dateStr) <= 0 && isCurrentMonth;        let lines = `
-          <div class="day-pop">
-            <div class="day-pop-title">${escapeHtml(dateStr)}</div>
-            <div class="day-pop-divider"></div>
-        `;
-
-        dayBookings.forEach((b) => {
-          const cls = b.priority ? "signal-priority" : "signal-normal";
-          lines += `
-            <div class="day-pop-line">
-              <span class="signal-dot ${cls}"></span>
-              <span>${escapeHtml(b.cpName)}</span>
+  </section>
+
+  <!-- ══ TAB GROUP ══ -->
+  <section class="slide" id="tab-group" data-index="1" style="--accent-color:#0B7C4F;--accent-light:#E6F7F0;">
+    <div class="slide-inner">
+      <div class="slide-header reveal">
+        <div class="slide-eyebrow">Chrome 工具 · 01</div>
+        <h2 class="slide-title"><span class="accent">分頁群組</span><br>Tab Grouping</h2>
+        <p class="slide-desc">把相關分頁整理成有顏色的群組，告別 30 個分頁混亂的痛苦</p>
+      </div>
+
+      <!-- Tab bar visual -->
+      <div class="card reveal d1">
+        <div class="card-head">
+          <div class="card-icon" style="background:#E6F7F0;font-size:18px;">🖥</div>
+          <div class="card-title">分頁群組示意圖</div>
+        </div>
+        <div class="card-body">
+          <div class="tab-bar">
+            <div style="display:flex;flex-direction:column;align-items:flex-start;">
+              <div class="group-label" style="--grp-color:#1A6FFF;">專案進度</div>
+              <div class="tab-group-wrap" style="border-color:#1A6FFF;background:rgba(26,111,255,.08);">
+                <div class="tab-item">📊 甘特圖</div>
+                <div class="tab-item">📋 Google Tasks</div>
+                <div class="tab-item">📁 雲端硬碟</div>
+              </div>
             </div>
-          `;
-        });
-
-        if (regularFull) {
-          lines += `
-            <div class="day-pop-divider"></div>
-            <div class="day-pop-full">名額已滿 FULL</div>
-          `;
-        }
-
-        lines += `</div>`;
-        return lines;
-      }
-
-      function buildDayCell(date, isCurrentMonth, columnIndex) {
-        const dateStr = formatDateString(date);
-        const dayBookings = getBookingsForDate(dateStr);
-        const bookedForBadge = getBookedCountForBadge(dateStr);
-        const remaining = getRemainingBaseSlots(dateStr);
-        const selectable = isCurrentMonth && isDateBookable(date);
-        const isSelected = selectedDateStr === dateStr;
-        const regularFull = isCurrentMonth && selectable && remaining <= 0;
-        const hasInfo = dayBookings.length > 0;
-        const isPast = isCurrentMonth && startOfDay(date) < today;
-        const showEmptyText = isCurrentMonth && selectable && !isPast && !dayBookings.length;
-
-        const cls = [
-          "day",
-          `col-${columnIndex}`,
-          isCurrentMonth ? "" : "outside-month",
-          selectable ? "selectable" : "locked",
-          isSelected ? "selected" : "",
-          hasInfo ? "has-info" : "",
-          isPast ? "past" : ""
-        ].filter(Boolean).join(" ");
-
-        let topRight = "";
-        if (!isCurrentMonth) {
-          topRight = `<div class="day-top-right locked">即將開放</div>`;
-        } else if (isPast) {
-          topRight = `<div class="day-top-right locked">不開放預約</div>`;
-        } else if (!selectable) {
-          topRight = `<div class="day-top-right locked">即將開放</div>`;
-        } else {
-          topRight = `<div class="day-top-right">${bookedForBadge}/3</div>`;
-        }
-
-        let bookingHtml = "";
-        if (dayBookings.length) {
-          bookingHtml = dayBookings.map(item => {
-            const cls = item.priority ? "signal-priority" : "signal-normal";
-            return `
-              <span class="booking-text" title="${escapeHtml(item.cpName)}">
-                <span class="signal-dot ${cls}"></span>
-                <span>${escapeHtml(item.cpName)}</span>
-              </span>
-            `;
-          }).join("");
-        } else if (showEmptyText) {
-          bookingHtml = `<div class="empty-note">開放預約中</div>`;
-        }
-
-        const fullRibbon = regularFull ? `<div class="full-ribbon">FULL</div>` : "";
-        const popHtml = buildPopupForDay(dateStr, dayBookings, selectable, isCurrentMonth);
-
-        return `
-          <div class="${cls}" data-date="${dateStr}">
-            ${fullRibbon}
-            <div class="day-header">
-              <div class="day-num">${date.getDate()}</div>
-              ${topRight}
+            <div style="display:flex;flex-direction:column;align-items:flex-start;margin-left:6px;">
+              <div class="group-label" style="--grp-color:#E8560A;">聯絡客戶</div>
+              <div class="tab-group-wrap" style="border-color:#E8560A;background:rgba(232,86,10,.08);">
+                <div class="tab-item">📧 Gmail</div>
+                <div class="tab-item">📞 Meet</div>
+              </div>
             </div>
-            <div class="day-bookings">
-              ${bookingHtml}
+            <div style="margin-left:8px;align-self:flex-end;padding-bottom:6px;">
+              <div class="tab-standalone">🌐 一般分頁</div>
             </div>
-            ${popHtml}
           </div>
-        `;
-      }
+        </div>
+      </div>
 
-      function renderCalendar() {
-        const firstDay = new Date(viewYear, viewMonth, 1);
-        const startWeekday = firstDay.getDay();
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      <div class="three-col" style="margin-top:16px;">
+        <!-- Step 1 -->
+        <div class="card reveal d2">
+          <div class="card-head" style="padding:14px 16px;">
+            <div class="card-icon" style="background:#E6F7F0;font-size:16px;">1️⃣</div>
+            <div class="card-title" style="font-size:13px;">建立群組</div>
+          </div>
+          <div class="card-body" style="padding:14px 16px;">
+            <div class="steps">
+              <div class="step" style="padding:10px 12px;">
+                <div class="step-num" style="width:22px;height:22px;font-size:10px;">→</div>
+                <div class="step-body">
+                  <div class="step-desc">在分頁上按<strong>右鍵</strong></div>
+                </div>
+              </div>
+              <div class="step" style="padding:10px 12px;">
+                <div class="step-num" style="width:22px;height:22px;font-size:10px;">→</div>
+                <div class="step-body">
+                  <div class="step-desc">選 <strong>「將分頁加入新群組」</strong></div>
+                </div>
+              </div>
+              <div class="step" style="padding:10px 12px;">
+                <div class="step-num" style="width:22px;height:22px;font-size:10px;">→</div>
+                <div class="step-body">
+                  <div class="step-desc">輸入名稱、選擇顏色（共 9 種）</div>
+                </div>
+              </div>
+              <div class="step" style="padding:10px 12px;">
+                <div class="step-num" style="width:22px;height:22px;font-size:10px;">✓</div>
+                <div class="step-body">
+                  <div class="step-desc">點擊<strong>空白處</strong>完成</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        els.monthTitle.textContent = `${viewYear}年 ${viewMonth + 1}月`;
+        <!-- Step 2 -->
+        <div class="card reveal d3">
+          <div class="card-head" style="padding:14px 16px;">
+            <div class="card-icon" style="background:#E6F7F0;font-size:16px;">2️⃣</div>
+            <div class="card-title" style="font-size:13px;">加入其他分頁</div>
+          </div>
+          <div class="card-body" style="padding:14px 16px;">
+            <div class="tip" style="background:#E6F7F0;">
+              <span class="tip-icon">🖱</span>
+              <span style="font-size:12px;"><strong>拖曳法（最直覺）</strong><br>按住分頁直接拖進群組框框內，顏色線條包住即成功</span>
+            </div>
+            <div style="margin-top:10px;padding:12px;background:var(--bg);border-radius:10px;border:1px solid var(--pale);">
+              <div style="font-size:12px;color:var(--mid);margin-bottom:6px;">也可以右鍵選單：</div>
+              <div style="font-size:12px;font-weight:600;">「將分頁加入群組 →」<br>→ 選擇已有的群組名稱</div>
+            </div>
+          </div>
+        </div>
 
-        let html = WEEKDAYS.map(d => `<div class="weekday">${d}</div>`).join("");
+        <!-- Step 3 -->
+        <div class="card reveal d4">
+          <div class="card-head" style="padding:14px 16px;">
+            <div class="card-icon" style="background:#E6F7F0;font-size:16px;">3️⃣</div>
+            <div class="card-title" style="font-size:13px;">解散或關閉</div>
+          </div>
+          <div class="card-body" style="padding:14px 16px;">
+            <div class="feature-list">
+              <div class="feature-item" style="padding:10px 12px;">
+                <div class="feature-bullet" style="background:#0B7C4F;">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5L4.5 9 10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="feature-text" style="font-size:12px;">
+                  <strong>「取消群組」</strong><br>
+                  <span class="dim">網頁保留，彩色外框消失</span>
+                </div>
+              </div>
+              <div class="feature-item" style="padding:10px 12px;">
+                <div class="feature-bullet" style="background:#E8560A;">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M3 3l6 6M9 3l-6 6" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+                </div>
+                <div class="feature-text" style="font-size:12px;">
+                  <strong>「關閉群組」</strong><br>
+                  <span class="dim">一鍵關閉群組內所有分頁</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        for (let i = 0; i < startWeekday; i++) {
-          const date = new Date(viewYear, viewMonth, i - startWeekday + 1);
-          html += buildDayCell(date, false, i % 7);
-        }
+  <!-- ══ CHROME CMD ══ -->
+  <section class="slide" id="chrome-cmd" data-index="2" style="--accent-color:#7B35C2;--accent-light:#F2EAFF;background:var(--ink);">
+    <div class="slide-inner">
+      <div class="slide-header reveal">
+        <div class="slide-eyebrow" style="color:rgba(255,255,255,.4);">Chrome 工具 · 02</div>
+        <h2 class="slide-title" style="color:#fff;">Chrome<br><span style="color:#C4E86B;">行動指令</span></h2>
+        <p class="slide-desc" style="color:rgba(255,255,255,.45);">在網址列直接輸入指令，不用滑鼠點選，鍵盤就能完成所有操作</p>
+      </div>
 
-        for (let d = 1; d <= daysInMonth; d++) {
-          const date = new Date(viewYear, viewMonth, d);
-          const cellIndex = startWeekday + (d - 1);
-          html += buildDayCell(date, true, cellIndex % 7);
-        }
+      <div class="card reveal d1" style="background:#232320;border-color:rgba(255,255,255,.08);">
+        <div class="card-head" style="border-color:rgba(255,255,255,.08);">
+          <div class="card-icon" style="background:rgba(196,232,107,.15);font-size:18px;">⌨️</div>
+          <div class="card-title" style="color:#fff;">網址列直接下指令</div>
+          <div class="card-tag" style="background:rgba(196,232,107,.15);color:#C4E86B;">Omnibox</div>
+        </div>
+        <div class="card-body">
+          <!-- URL bar demo -->
+          <div style="background:#111;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.06);">
+            <div style="width:12px;height:12px;border-radius:50%;background:#3A3A3A;"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:#3A3A3A;"></div>
+            <div style="width:12px;height:12px;border-radius:50%;background:#3A3A3A;"></div>
+            <div style="flex:1;background:#1E1E1E;border-radius:6px;padding:6px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.3);margin:0 8px;">
+              🔍 在這裡輸入指令...
+            </div>
+          </div>
 
-        const totalCells = startWeekday + daysInMonth;
-        const remain = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+          <div class="cmd-box reveal d1" onclick="copyCmd(this,'清除瀏覽資料')" title="點擊複製">
+            <div class="cmd-url">
+              <span class="cmd-url-cursor">|</span>
+              <span class="cmd-url-text">清除瀏覽資料</span>
+            </div>
+            <div style="font-size:18px;">→</div>
+            <div class="cmd-desc">清除 Cookie 與快取</div>
+            <div class="copy-btn">📋</div>
+          </div>
 
-        for (let i = 1; i <= remain; i++) {
-          const date = new Date(viewYear, viewMonth + 1, i);
-          const cellIndex = startWeekday + daysInMonth + (i - 1);
-          html += buildDayCell(date, false, cellIndex % 7);
-        }
+          <div class="cmd-box reveal d2" onclick="copyCmd(this,'管理密碼')" title="點擊複製">
+            <div class="cmd-url">
+              <span class="cmd-url-cursor">|</span>
+              <span class="cmd-url-text">管理密碼</span>
+            </div>
+            <div style="font-size:18px;">→</div>
+            <div class="cmd-desc">開啟密碼管理員</div>
+            <div class="copy-btn">📋</div>
+          </div>
 
-        els.calendarGrid.innerHTML = html;
+          <div class="cmd-box reveal d3" onclick="copyCmd(this,'更新 Chrome')" title="點擊複製">
+            <div class="cmd-url">
+              <span class="cmd-url-cursor">|</span>
+              <span class="cmd-url-text">更新 Chrome</span>
+            </div>
+            <div style="font-size:18px;">→</div>
+            <div class="cmd-desc">直接觸發更新程序</div>
+            <div class="copy-btn">📋</div>
+          </div>
+        </div>
+      </div>
 
-        els.calendarGrid.querySelectorAll(".day.selectable").forEach(el => {
-          el.addEventListener("click", () => setSelectedDate(el.dataset.date));
-        });
-      }
+      <div class="card reveal d4" style="background:#232320;border-color:rgba(255,255,255,.08);margin-top:16px;">
+        <div class="card-head" style="border-color:rgba(255,255,255,.08);">
+          <div class="card-icon" style="background:rgba(196,232,107,.15);font-size:18px;">⚡</div>
+          <div class="card-title" style="color:#fff;">鍵盤快捷鍵</div>
+          <div class="card-tag" style="background:rgba(196,232,107,.15);color:#C4E86B;">Shortcut</div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;padding:14px;background:#111;border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+              <div style="font-size:11px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">清除瀏覽資料</div>
+              <div style="display:flex;gap:4px;align-items:center;">
+                <span class="key">Cmd</span>
+                <span style="color:rgba(255,255,255,.3);">+</span>
+                <span class="key">Shift</span>
+                <span style="color:rgba(255,255,255,.3);">+</span>
+                <span class="key">Del</span>
+              </div>
+              <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:8px;">Windows: Ctrl + Shift + Delete</div>
+            </div>
+            <div style="flex:1;min-width:200px;padding:14px;background:#111;border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+              <div style="font-size:11px;color:rgba(255,255,255,.35);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">網址列行動指令</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.65;">
+                直接在網址列輸入<br>中文或英文關鍵字<br>Chrome 會自動偵測並執行對應的瀏覽器功能
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:12px 16px;background:rgba(196,232,107,.08);border-radius:10px;border:1px solid rgba(196,232,107,.15);font-size:13px;color:#C4E86B;line-height:1.65;">
+            💡 <strong style="color:#d6f099;">小訣竅：</strong>不需要記全名，輸入幾個關鍵字後 Chrome 會顯示建議選項，直接點擊即可執行
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- ══ TASKS BASIC ══ -->
+  <section class="slide" id="tasks-basic" data-index="3" style="--accent-color:#1A6FFF;--accent-light:#E8F0FF;">
+    <div class="slide-inner">
+      <div class="slide-header reveal">
+        <div class="slide-eyebrow">Google Tasks · 03</div>
+        <h2 class="slide-title"><span class="accent">建立Task清單</span><br>與管理待辦</h2>
+        <p class="slide-desc">從新增清單到設定截止日，3 步驟讓任務清晰呈現在 Google 日曆上</p>
+      </div>
 
-      function toggleMiniCalendar() {
-        els.miniCalendarPop.classList.toggle("show");
-      }
+      <div class="two-col">
+        <!-- 建立清單 -->
+        <div class="card reveal d1">
+          <div class="card-head">
+            <div class="card-icon" style="background:#E8F0FF;font-size:20px;">📋</div>
+            <div class="card-title">建立清單與新增工作</div>
+            <div class="card-tag" style="background:#E8F0FF;color:#1A6FFF;">Step 1</div>
+          </div>
+          <div class="card-body">
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <div class="step-title">建立新清單</div>
+                  <div class="step-desc">側邊欄底部點擊 <strong>「建立新清單」</strong>，輸入清單名稱（如：工作任務）</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <div class="step-title">新增工作項目</div>
+                  <div class="step-desc">點擊 <strong>「新增工作」</strong>，輸入任務名稱，例如「整理會議記錄」</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <div class="step-title">設定時間與截止日期</div>
+                  <div class="step-desc">點右側 <strong>「⋯」→「新增截止時間」</strong>，任務將自動同步顯示於 Google 日曆</div>
+                </div>
+              </div>
+            </div>
+            <div class="tip" style="background:#E8F0FF;">
+              <span class="tip-icon">📅</span>
+              <span>設定截止日後，任務會顯示在 Google 日曆對應日期的頂端，方便一眼掌握所有 Deadline</span>
+            </div>
+          </div>
+        </div>
 
-      function closeMiniCalendar() {
-        els.miniCalendarPop.classList.remove("show");
-      }
+        <!-- Calendar Mock -->
+        <div class="reveal d2">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-icon" style="background:#E8F0FF;font-size:18px;">🗓</div>
+              <div class="card-title">Tasks 在 Google 日曆的樣子</div>
+            </div>
+            <div class="card-body" style="padding:14px;">
+              <div class="calendar-mock">
+                <div class="cal-header">
+                  <div class="cal-day"><div class="day-num">13</div>六</div>
+                  <div class="cal-day"><div class="day-num">14</div>日</div>
+                  <div class="cal-day"><div class="day-num">15</div>一</div>
+                  <div class="cal-day"><div class="day-num">16</div>二</div>
+                  <div class="cal-day"><div class="day-num">17</div>三</div>
+                </div>
+                <div class="cal-row">
+                  <div class="cal-cell">
+                    <div class="cal-event" style="background:rgba(255,204,0,.15);color:#FFCC00;border:1px solid rgba(255,204,0,.3);">
+                      <span>🕕</span> 下午6點
+                      <span class="cal-label" style="background:rgba(255,204,0,.15);color:#FFCC00;">子工作</span>
+                    </div>
+                    <div style="font-size:9px;color:rgba(255,255,255,.25);padding:2px 4px;">複審追蹤 Assign</div>
+                  </div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell">
+                    <div class="cal-event" style="background:rgba(239,68,68,.18);color:#FCA5A5;border:1px solid rgba(239,68,68,.3);">
+                      <span>⊘</span> 到期：初稿製作
+                      <span class="cal-label" style="background:rgba(239,68,68,.15);color:#FCA5A5;">截止</span>
+                    </div>
+                  </div>
+                  <div class="cal-cell"></div>
+                  <div class="cal-cell"></div>
+                </div>
+              </div>
+              <div class="tip" style="background:#E8F0FF;margin-top:0;">
+                <span class="tip-icon">💡</span>
+                <span>黃框 = 設定的任務子項目（含時間）<br>紅框 = 截止日期提醒（到期警示）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      function renderMiniCalendar() {
-        const firstDay = new Date(miniYear, miniMonth, 1);
-        const startWeekday = firstDay.getDay();
-        const daysInMonth = new Date(miniYear, miniMonth + 1, 0).getDate();
+  <!-- ══ TASKS ADVANCED ══ -->
+  <section class="slide" id="tasks-advanced" data-index="4" style="--accent-color:#1A6FFF;--accent-light:#E8F0FF;">
+    <div class="slide-inner">
+      <div class="slide-header reveal">
+        <div class="slide-eyebrow">Google Tasks · 04</div>
+        <h2 class="slide-title">進階功能：<br><span class="accent">子工作 & 標記</span></h2>
+        <p class="slide-desc">將大任務拆解、備註連結自動轉換、重點用星號標記，讓清單更結構化</p>
+      </div>
 
-        els.miniTitle.textContent = `${miniYear}年 ${miniMonth + 1}月`;
+      <div class="two-col">
+        <div class="card reveal d1">
+          <div class="card-head">
+            <div class="card-icon" style="background:#E8F0FF;font-size:18px;">🔀</div>
+            <div class="card-title">新增子工作（任務拆解）</div>
+          </div>
+          <div class="card-body">
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <div class="step-title">點開主任務</div>
+                  <div class="step-desc">點擊任務名稱旁的 <strong>「⋯」</strong> 展開選項選單</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <div class="step-title">新增子工作</div>
+                  <div class="step-desc">選擇 <strong>「新增子工作」</strong>，輸入拆解後的小步驟名稱</div>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <div class="step-title">子工作可設定截止時間</div>
+                  <div class="step-desc">每個子工作也能單獨設定截止日，會在日曆上<strong>獨立顯示</strong></div>
+                </div>
+              </div>
+            </div>
+            <!-- Task visual mock -->
+            <div style="background:#F0EDE8;border-radius:12px;padding:14px;margin-top:14px;">
+              <div style="font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mid);margin-bottom:10px;">示意：任務結構</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:white;border-radius:8px;margin-bottom:6px;border:1px solid var(--border);">
+                <span style="font-size:14px;">☐</span>
+                <span style="font-size:13px;font-weight:700;">籌辦 Q3 新品發表會</span>
+                <span style="margin-left:auto;font-size:18px;color:#FFB800;">⭐</span>
+              </div>
+              <div style="padding-left:20px;display:flex;flex-direction:column;gap:5px;">
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:white;border-radius:7px;border:1px solid var(--pale);">
+                  <span style="font-size:12px;color:var(--mid);">↳ ☐</span>
+                  <span style="font-size:12px;">確認主視覺設計</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:white;border-radius:7px;border:1px solid var(--pale);">
+                  <span style="font-size:12px;color:var(--mid);">↳ ☐</span>
+                  <span style="font-size:12px;">撰寫活動新聞稿</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:white;border-radius:7px;border:1px solid var(--pale);">
+                  <span style="font-size:12px;color:var(--mid);">↳ ☑</span>
+                  <span style="font-size:12px;text-decoration:line-through;color:var(--mid);">確認場地租借</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        let html = WEEKDAYS.map(d => `<div class="mini-weekday">${d}</div>`).join("");
+        <div class="card reveal d2">
+          <div class="card-head">
+            <div class="card-icon" style="background:#E8F0FF;font-size:18px;">✨</div>
+            <div class="card-title">備註連結 & 星號標記</div>
+          </div>
+          <div class="card-body">
+            <div class="feature-list">
+              <div class="feature-item">
+                <div class="feature-bullet" style="background:#1A6FFF;">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2 6h8M8 3l3 3-3 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="feature-text">
+                  <strong>備註欄自動轉 URL</strong><br>
+                  <span class="dim">在備註欄貼上連結後，系統自動將文字轉換為可點擊的超連結，方便追蹤相關資源</span>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-bullet" style="background:#FFB800;">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M6 1l1.5 3 3.5.5-2.5 2.5.5 3.5L6 9 3 10.5l.5-3.5L1 4.5 4.5 4z" stroke="white" stroke-width="1.2" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="feature-text">
+                  <strong>星號標記重要任務</strong><br>
+                  <span class="dim">點擊任務旁的 ⭐ 星號圖示，可將重點任務加上標記，與「已加星號」清單集中管理</span>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-bullet" style="background:#00C9A7;">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2 6.5L4.5 9 10 3" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="feature-text">
+                  <strong>快速勾選完成</strong><br>
+                  <span class="dim">任務完成後點擊左側圓圈打勾，任務自動移入「已完成」，介面保持乾淨整潔</span>
+                </div>
+              </div>
+            </div>
+            <div class="tip" style="background:#FFF8E6;margin-top:16px;">
+              <span class="tip-icon">⭐</span>
+              <span>善用星號標記 + 子工作拆解，大專案也能一目了然、逐步推進</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        for (let i = 0; i < startWeekday; i++) {
-          html += `<div></div>`;
-        }
 
-        for (let d = 1; d <= daysInMonth; d++) {
-          const date = new Date(miniYear, miniMonth, d);
-          const dateStr = formatDateString(date);
-          const disabled = !isDateBookable(date);
-          const isSelected = selectedDateStr === dateStr;
-          const isToday = dateStr === formatDateString(today);
+</main>
+</div>
 
-          html += `
-            <button
-              type="button"
-              class="mini-day ${disabled ? "disabled" : ""} ${isSelected ? "selected" : ""} ${isToday ? "today" : ""}"
-              data-date="${dateStr}"
-              ${disabled ? "disabled" : ""}
-            >${d}</button>
-          `;
-        }
+<button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()" title="回到頂部">
+  <svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 14V4M4 9l5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
 
-        els.miniCalendarGrid.innerHTML = html;
+<div class="copy-toast" id="copyToast">已複製！</div>
 
-        els.miniCalendarGrid.querySelectorAll(".mini-day:not(.disabled)").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const dateStr = btn.dataset.date;
-            const d = parseDateString(dateStr);
-            viewYear = d.getFullYear();
-            viewMonth = d.getMonth();
-            setSelectedDate(dateStr);
-          });
-        });
-      }
+<script>
+function copyCmd(el, text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  const toast = document.getElementById('copyToast');
+  toast.textContent = `已複製：${text}`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+  const btn = el.querySelector('.copy-btn');
+  if (btn) { btn.textContent = '✅'; setTimeout(() => btn.textContent = '📋', 1500); }
+}
+const slides = document.querySelectorAll('.slide');
+const navItems = document.querySelectorAll('.nav-item');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const total = slides.length;
 
-      function escapeHtml(str) {
-        return String(str)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-    })();
-  </script>
+// ── Scroll reveal ──────────────────────────
+const revealEls = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+revealEls.forEach(el => revealObs.observe(el));
+
+// ── Active section tracking ────────────────
+const sectionObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const id = e.target.id;
+    const idx = parseInt(e.target.dataset.index);
+
+    navItems.forEach(n => n.classList.remove('active'));
+    const active = document.querySelector(`.nav-item[data-target="${id}"]`);
+    if (active) active.classList.add('active');
+
+    progressFill.style.width = ((idx + 1) / total * 100) + '%';
+    progressLabel.textContent = `進度 ${idx + 1} / ${total}`;
+  });
+}, { threshold: 0.4 });
+slides.forEach(s => sectionObs.observe(s));
+
+// ── Nav click ──────────────────────────────
+navItems.forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.target;
+    goTo(target);
+  });
+});
+
+function scrollToTop() {
+  const content = document.getElementById('content');
+  if (window.innerWidth <= 860) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    content.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ── Scroll-to-top button visibility ───────
+const scrollTopBtn = document.getElementById('scrollTopBtn');
+const contentEl = document.getElementById('content');
+function onScroll() {
+  const scrolled = window.innerWidth <= 860 ? window.scrollY : contentEl.scrollTop;
+  scrollTopBtn.classList.toggle('visible', scrolled > 200);
+}
+contentEl.addEventListener('scroll', onScroll);
+window.addEventListener('scroll', onScroll);
+
+function goTo(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const content = document.getElementById('content');
+  if (window.innerWidth <= 860) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  } else {
+    content.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
+  }
+}
+</script>
 </body>
 </html>
